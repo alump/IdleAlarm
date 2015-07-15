@@ -6,8 +6,6 @@ import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 import org.vaadin.alump.idlealarm.client.shared.IdleCountdownLabelState;
 import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
 
-import javax.swing.text.AbstractDocument;
-
 /**
  * This class is more for debug use cases. It will shown time to idle timeout on client side
  */

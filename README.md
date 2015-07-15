@@ -10,28 +10,41 @@ can be configured by server side API. Actual logic is fully on client side, to p
 
 Try the add-on demo at http://app.siika.fi/IdleAlarmDemo
 
-## Usage example
+## Developer Guide
 ```java
 // Show default warning 60s before session will be expired
 IdleAlarm.get().setSecondsBefore(60);
 
 // Or construct your own message
 IdleAlarm.get().setSecondsBefore(60)
-    .setMessage("Your session will expire in less than " + IdleAlarmFormatting.SECS_TO_TIMEOUT
-        + " seconds. Please Click anywhere to continue session.");
+    .setMessage("Your session will expire in less than "
+        + IdleAlarmFormatting.SECS_TO_TIMEOUT
+        + " seconds. Please click anywhere to extend session.");
 ```
+
+For more examples, check demo project from GitHub.
 
 ## Download release
 
-Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to http://vaadin.com/addon/idlealarm
+Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to
+http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
-### Version 0.1.0 (TODO)
+### Version 0.1.0 (2015-07-15)
 - Initial release
 - OSGi bundled
 - Server side API to define message (time to timeout, timeout length and time sense reset template variables available)
 - IdleCountdownLabel for idle debugging (updates once a second, supports same variables as IdleAlarm)
+
+## Roadmap
+
+High priority features:
+- Location of alarm to be defined by server side API (top left, ... center, ... bottom right)
+- Better styling with variables (color etc...)
+
+Lower priority features:
+- TODO
 
 ## Building and running demo
 
@@ -69,15 +82,7 @@ To debug project and make code modifications on the fly in the server-side, righ
 
 The most common way of debugging and making changes to the client-side code is dev-mode. To create debug configuration for it, open idlealarm-demo project properties and click "Create Development Mode Launch" button on the Vaadin tab. Right-click newly added "GWT development mode for idlealarm-demo.launch" and choose Debug As > Debug Configurations... Open up Classpath tab for the development mode configuration and choose User Entries. Click Advanced... and select Add Folders. Choose Java and Resources under idlealarm-addon/src/main and click ok. Now you are ready to start debugging the client-side code by clicking debug. Click Launch Default Browser button in the GWT Development Mode in the launched application. Now you can modify and breakpoints to client-side classes and see changes by reloading the web page. 
 
-Another way of debugging client-side is superdev mode. To enable it, uncomment devModeRedirectEnabled line from the end of DemoWidgetSet.gwt.xml located under idlealarm-demo resources folder and compile the widgetset once by running vaadin:compile Maven target for idlealarm-demo. Refresh idlealarm-demo project resources by right clicking the project and choosing Refresh. Click "Create SuperDevMode Launch" button on the Vaadin tab of the idlealarm-demo project properties panel to create superder mode code server launch configuration and modify the class path as instructed above. After starting the code server by running SuperDevMode launch as Java application, you can navigate to http://localhost:8080/?superdevmode. Now all code changes you do to your client side will get compiled as soon as you reload the web page. You can also access Java-sources and set breakpoints inside Chrome if you enable source maps from inspector settings. 
-
-## Roadmap
-
-High priority features:
-- Location of alarm to be defined by server side API (top left, ... center, ... bottom right)
-
-Lower priority features:
-- TODO
+Another way of debugging client-side is superdev mode. To enable it, uncomment devModeRedirectEnabled line from the end of DemoWidgetSet.gwt.xml located under idlealarm-demo resources folder and compile the widgetset once by running vaadin:compile Maven target for idlealarm-demo. Refresh idlealarm-demo project resources by right clicking the project and choosing Refresh. Click "Create SuperDevMode Launch" button on the Vaadin tab of the idlealarm-demo project properties panel to create superder mode code server launch configuration and modify the class path as instructed above. After starting the code server by running SuperDevMode launch as Java application, you can navigate to http://localhost:8080/?superdevmode. Now all code changes you do to your client side will get compiled as soon as you reload the web page. You can also access Java-sources and set breakpoints inside Chrome if you enable source maps from inspector settings.
 
 ## Issue tracking
 
@@ -99,17 +104,3 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
 IdleAlarm extension is written by Sami Viitanen <sami.viitanen@gmail.com>
-
-# Developer Guide
-
-## Getting started
-
-Here is a simple example on how to try out the add-on component:
-
-<...>
-
-For a more comprehensive example, see idlealarm-demo/src/main/java/org/vaadin/alump/idlealarm/demo/DemoUI.java
-
-## API
-
-IdleAlarm JavaDoc is available online at TODO

@@ -14,7 +14,7 @@ import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
 public class IdleAlarm extends AbstractExtension {
 
     public static final String DEFAULT_FORMATTING = "Your session will expire in less than "
-            + IdleAlarmFormatting.SECS_TO_TIMEOUT + " seconds";
+            + IdleAlarmFormatting.SECS_TO_TIMEOUT + " seconds. Please click anywhere to extend session.";
 
     protected IdleAlarm(UI ui) {
         setMessage(DEFAULT_FORMATTING);

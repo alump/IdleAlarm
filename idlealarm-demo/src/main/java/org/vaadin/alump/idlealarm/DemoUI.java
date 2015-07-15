@@ -28,9 +28,9 @@ public class DemoUI extends UI {
     private static final String GUIDE = "IdleAlarm add-on is designed to be used with Vaadin's idle timeout feature. "
             + "Add-on adds option to show alarm to user when sessions is about to expire because of long idle period.";
 
-    private static final String NOTICE = "Please notice that there is always some extra delay, from seconds to few "
-        + "minutes before session really gets expired. As the idle time out in this application is set to very short "
-        + "(60 seconds), you can easily see this extra time here.";
+    private static final String NOTICE = "<b>Please notice</b> that there is always some extra delay, from seconds to "
+        + "few minutes before session really gets expired. As the idle time out in this application is set to very "
+        + " short (60 seconds), you can easily see this extra time here.";
 
     // This add-on old works when closeIdleSessions init parameter is true
     @WebServlet(value = "/*", asyncSupported = true, initParams = {
