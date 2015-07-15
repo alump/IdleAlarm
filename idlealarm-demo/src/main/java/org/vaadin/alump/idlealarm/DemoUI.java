@@ -59,7 +59,7 @@ public class DemoUI extends UI {
         setContent(layout);
 
         layout.addComponent(new Label(GUIDE));
-        layout.addComponent(new Label(NOTICE));
+        layout.addComponent(new Label(NOTICE, ContentMode.HTML));
 
         // -- Inputs to modify IdleAlarm --
 
