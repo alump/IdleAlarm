@@ -2,8 +2,9 @@
 
 [![Build Status](http://siika.fi:8888/jenkins/job/IdleAlarm%20(Vaadin)/badge/icon)](http://siika.fi:8888/jenkins/job/IdleAlarm%20(Vaadin)/)
 
-IdleAlarm is Vaadin extension that allows to add client side alarm that is shown
-before user's session is idle expired.
+IdleAlarm is Vaadin add-on designed to be used with Vaadin's idle timeout feature. It adds alarm that is shown to user
+before sessions gets removed because of long idling. Message shown to user, and how long before idle expire it's shown,
+can be configured by server side API. Actual logic is fully on client side, to prevent pushing idle timeout to future.
 
 ## Online demo
 
@@ -11,7 +12,13 @@ Try the add-on demo at http://app.siika.fi/IdleAlarmDemo
 
 ## Usage example
 ```java
-// TODO
+// Show default warning 60s before session will be expired
+IdleAlarm.get().setSecondsBefore(60);
+
+// Or construct your own message
+IdleAlarm.get().setSecondsBefore(60)
+    .setMessage("Your session will expire in less than " + IdleAlarmFormatting.SECS_TO_TIMEOUT
+        + " seconds. Please Click anywhere to continue session.");
 ```
 
 ## Download release
@@ -22,6 +29,9 @@ Official releases of this add-on are available at Vaadin Directory. For Maven in
 
 ### Version 0.1.0 (TODO)
 - Initial release
+- OSGi bundled
+- Server side API to define message (time to timeout, timeout length and time sense reset template variables available)
+- IdleCountdownLabel for idle debugging (updates once a second, supports same variables as IdleAlarm)
 
 ## Building and running demo
 
@@ -64,7 +74,7 @@ Another way of debugging client-side is superdev mode. To enable it, uncomment d
 ## Roadmap
 
 High priority features:
-- TODO
+- Location of alarm to be defined by server side API (top left, ... center, ... bottom right)
 
 Lower priority features:
 - TODO

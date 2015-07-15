@@ -180,6 +180,7 @@
 							com.vaadin.shared;version="[7.4,8)",
 							com.vaadin.shared.communication;version="[7.4,8)",
 							com.vaadin.shared.ui;version="[7.4,8)",
+							com.vaadin.shared.ui.label;version="[7.4,8)",
 							com.vaadin.ui;version="[7.4,8)"</Import-Package>
 					</instructions>
 				</configuration>

@@ -1,0 +1,19 @@
+@mixin idlealarm {
+
+  &.v-overlay-container {
+
+    .idle-alarm-popup {
+      opacity: 0.8;
+      background-color: yellow;
+      padding: 1rem;
+      border: 1px solid #AA0;
+      pointer-events: none;
+
+      .idle-alarm-message {
+        color: black;
+      }
+
+    }
+
+  }
+}

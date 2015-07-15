@@ -1,0 +1,5 @@
+*.css
+*.iml
+.idea/
+target/
+idlealarm-demo/src/main/webapp/VAADIN/widgetsets/

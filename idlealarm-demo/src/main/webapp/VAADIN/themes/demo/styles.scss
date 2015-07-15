@@ -1,0 +1,12 @@
+@import "../valo/valo";
+@import "addons";
+
+// Prefix all selectors in your theme with .demo
+.demo {
+
+  // Include valo theme styles in your theme
+  @include valo;
+
+  @include addons;
+
+}
