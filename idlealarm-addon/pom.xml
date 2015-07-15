@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.alump.idlealarm</groupId>
 	<artifactId>idlealarm-addon</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>IdleAlarm</name>
 
 	<properties>
@@ -90,6 +90,12 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-client</artifactId>
 			<version>${vaadin.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 		

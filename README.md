@@ -31,6 +31,9 @@ http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
+### Version 0.1.1 (TOOD)
+- Compile errors of addon resolved by adding servlet dependency
+
 ### Version 0.1.0 (2015-07-15)
 - Initial release
 - OSGi bundled
