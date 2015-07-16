@@ -1,16 +1,26 @@
 @mixin idlealarm {
 
+  $idlealarm-bgcolor: yellow !default;
+  $idlealarm-color: black !default;
+  $idlealarm-border: 1px solid #AA0 !default;
+  $idlealarm-padding: 0.5rem 1rem !default;
+  $idlealarm-opacity: 0.8 !default;
+
   &.v-overlay-container {
 
     .idle-alarm-popup {
-      opacity: 0.8;
-      background-color: yellow;
-      padding: 1rem;
-      border: 1px solid #AA0;
+      opacity: $idlealarm-opacity;
+      background-color: $idlealarm-bgcolor;
+      padding: $idlealarm-padding;
+      border: $idlealarm-border;
       pointer-events: none;
 
       .idle-alarm-message {
-        color: black;
+        color: $idlealarm-color;
+
+        pre {
+          margin: 0;
+        }
       }
 
     }

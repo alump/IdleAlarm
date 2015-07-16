@@ -28,8 +28,8 @@ public class DemoUI extends UI {
     private static final String GUIDE = "IdleAlarm add-on is designed to be used with Vaadin's idle timeout feature. "
             + "Add-on adds option to show alarm to user when sessions is about to expire because of long idle period.";
 
-    private static final String NOTICE = "<b>Please notice</b> that there is always some extra delay, from seconds to "
-        + "few minutes before session really gets expired. As the idle time out in this application is set to very "
+    private static final String NOTICE = "<b>Please notice</b> that there is always some extra delay (from seconds to "
+        + "few minutes) before session really gets expired. As the idle time out in this application is set to very "
         + " short (60 seconds), you can easily see this extra time here.";
 
     // This add-on old works when closeIdleSessions init parameter is true
@@ -72,29 +72,38 @@ public class DemoUI extends UI {
         secondsBefore.setWidth(60, Unit.PIXELS);
         row.addComponent(secondsBefore);
 
-        final TextField warningMessage = new TextField("Message");
-        warningMessage.setValue("Your session will timeout in less than " + IdleAlarmFormatting.SECS_TO_TIMEOUT
-                + " seconds. Click anywhere to continue session.");
+        final TextArea warningMessage = new TextArea("Message");
+        warningMessage.setValue(IdleAlarm.DEFAULT_FORMATTING);
         warningMessage.setWidth(100, Unit.PERCENTAGE);
         row.addComponent(warningMessage);
         row.setExpandRatio(warningMessage, 1f);
 
+        final ComboBox contentMode = new ComboBox("Content mode");
+        contentMode.addItem(ContentMode.TEXT);
+        contentMode.addItem(ContentMode.PREFORMATTED);
+        contentMode.addItem(ContentMode.HTML);
+        contentMode.setValue(ContentMode.TEXT);
+        contentMode.setNullSelectionAllowed(false);
+        row.addComponent(contentMode);
+
         final Button enableButton = new Button("Enable");
         row.addComponent(enableButton);
-        row.setComponentAlignment(enableButton, Alignment.BOTTOM_RIGHT);
+        row.setComponentAlignment(enableButton, Alignment.TOP_RIGHT);
         final Button disableButton = new Button("Disable");
         disableButton.setEnabled(false);
         row.addComponent(disableButton);
-        row.setComponentAlignment(disableButton, Alignment.BOTTOM_LEFT);
+        row.setComponentAlignment(disableButton, Alignment.TOP_LEFT);
 
         enableButton.addClickListener(event -> {
             enableButton.setEnabled(false);
             disableButton.setEnabled(true);
             secondsBefore.setEnabled(false);
             warningMessage.setEnabled(false);
+            contentMode.setEnabled(false);
 
             IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
-                    .setMessage(warningMessage.getValue());
+                    .setMessage(warningMessage.getValue())
+                    .setContentMode((ContentMode) contentMode.getValue());
         });
 
         disableButton.addClickListener(event -> {
@@ -102,9 +111,19 @@ public class DemoUI extends UI {
             disableButton.setEnabled(false);
             secondsBefore.setEnabled(true);
             warningMessage.setEnabled(true);
+            contentMode.setEnabled(true);
 
             IdleAlarm.unload();
         });
+
+        final String START_BLOCK = "<span class=\"keyword\">";
+        final String END_BLOCK = "</span>";
+        Label keywords = new Label("Keywords you can use in message are " + START_BLOCK
+                + IdleAlarmFormatting.SECS_TO_TIMEOUT + END_BLOCK + ", " + START_BLOCK
+                + IdleAlarmFormatting.SECS_MAX_IDLE_TIMEOUT + END_BLOCK + " " + " and "
+                + START_BLOCK + IdleAlarmFormatting.SECS_SINCE_RESET + END_BLOCK + ".",
+                ContentMode.HTML);
+        layout.addComponent(keywords);
 
         // -- Labels for debugging --
 

@@ -9,4 +9,12 @@
 
   @include addons;
 
+  .keyword {
+    font-family: monospace;
+    background-color: rgba(255,255,0,0.2);
+    color: black;
+    font-weight: bold;
+    padding: 0 0.5rem;
+  }
+
 }

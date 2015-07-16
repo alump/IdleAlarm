@@ -1,5 +1,12 @@
 *.css
-*.iml
-.idea/
 target/
 idlealarm-demo/src/main/webapp/VAADIN/widgetsets/
+
+# intellij
+*.iml
+.idea/
+
+# eclipse
+.settings/
+.project
+.classpath

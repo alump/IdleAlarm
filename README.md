@@ -31,8 +31,11 @@ http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
-### Version 0.1.1 (TOOD)
-- Compile errors of addon resolved by adding servlet dependency
+### Version 0.1.1 (2015-07-16)
+- Errors (compile and bundling) in 0.1.0 fixed
+- SCSS values can be now defined by variables
+- Content mode of warnings added to demo app
+- Minor improvement to default styling
 
 ### Version 0.1.0 (2015-07-15)
 - Initial release
@@ -44,7 +47,6 @@ http://vaadin.com/addon/idlealarm
 
 High priority features:
 - Location of alarm to be defined by server side API (top left, ... center, ... bottom right)
-- Better styling with variables (color etc...)
 
 Lower priority features:
 - TODO
