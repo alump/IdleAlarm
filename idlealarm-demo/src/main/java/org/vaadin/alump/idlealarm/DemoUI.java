@@ -143,6 +143,10 @@ public class DemoUI extends UI {
         });
         layout.addComponent(resetTimeout);
 
+        Link gitHub = new Link("IdleAlarm in GitHub (source code, issue tracker...)",
+                new ExternalResource("https://github.com/alump/IdleAlarm"));
+        layout.addComponent(gitHub);
+
     }
 
     private HorizontalLayout createRow(ComponentContainer parent) {
