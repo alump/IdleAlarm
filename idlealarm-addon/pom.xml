@@ -157,7 +157,7 @@
 					<instructions>
 						<Export-Package>
 							org.vaadin.alump.idlebutton,
-							org.vaadin.alump.idlebutton.client.shared.*
+							org.vaadin.alump.idlebutton.client.shared
 						</Export-Package>
 						<Import-Package>com.vaadin.data;version="[7.4,8)",
 							com.vaadin.server;version="[7.4,8)",
