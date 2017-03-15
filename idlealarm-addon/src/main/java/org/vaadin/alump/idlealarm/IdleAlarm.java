@@ -2,7 +2,7 @@ package org.vaadin.alump.idlealarm;
 
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.Extension;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.UI;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmState;

@@ -4,7 +4,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.*;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 
@@ -58,8 +58,12 @@ public class DemoUI extends UI {
         layout.setSpacing(true);
         setContent(layout);
 
-        layout.addComponent(new Label(GUIDE));
-        layout.addComponent(new Label(NOTICE, ContentMode.HTML));
+        Label guide = new Label(GUIDE);
+        guide.setWidth(100, Unit.PERCENTAGE);
+        layout.addComponent(guide);
+        Label notice = new Label(NOTICE, ContentMode.HTML);
+        notice.setWidth(100, Unit.PERCENTAGE);
+        layout.addComponent(notice);
 
         // -- Inputs to modify IdleAlarm --
 
@@ -79,11 +83,9 @@ public class DemoUI extends UI {
         row.setExpandRatio(warningMessage, 1f);
 
         final ComboBox contentMode = new ComboBox("Content mode");
-        contentMode.addItem(ContentMode.TEXT);
-        contentMode.addItem(ContentMode.PREFORMATTED);
-        contentMode.addItem(ContentMode.HTML);
+        contentMode.setItems(ContentMode.TEXT, ContentMode.PREFORMATTED, ContentMode.HTML);
         contentMode.setValue(ContentMode.TEXT);
-        contentMode.setNullSelectionAllowed(false);
+        contentMode.setEmptySelectionAllowed(false);
         row.addComponent(contentMode);
 
         final Button enableButton = new Button("Enable");

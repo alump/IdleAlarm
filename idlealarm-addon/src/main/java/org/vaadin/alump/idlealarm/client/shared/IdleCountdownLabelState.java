@@ -1,7 +1,7 @@
 package org.vaadin.alump.idlealarm.client.shared;
 
 import com.vaadin.shared.AbstractComponentState;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ContentMode;
 
 /**
  * State of idle countdown label

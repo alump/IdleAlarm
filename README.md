@@ -31,8 +31,8 @@ http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
-### Version 0.1.2 (TODO)
-- Next version, no new features implemented yet
+### Version 0.2.0 (2017-03-15)
+- Vaadin 8 support
 
 ### Version 0.1.1 (2015-07-16)
 - Errors (compile and bundling) in 0.1.0 fixed

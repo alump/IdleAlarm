@@ -3,7 +3,7 @@ package org.vaadin.alump.idlealarm.client;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.PreElement;
 import com.google.gwt.user.client.ui.HTML;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ContentMode;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 
 /**

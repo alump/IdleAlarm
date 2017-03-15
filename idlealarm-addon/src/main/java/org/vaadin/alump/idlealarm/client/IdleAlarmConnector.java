@@ -72,12 +72,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
                 overlay.add(overlayLabel);
                 // Use UI as owner
                 overlay.setOwner(getConnection().getUIConnector().getWidget());
-                overlay.addCloseHandler(new CloseHandler<PopupPanel>() {
-                    @Override
-                    public void onClose(CloseEvent<PopupPanel> event) {
-                        if(event.isAutoClosed()) {
-                            resetTimeout();
-                        }
+                overlay.addCloseHandler(e -> {
+                    if(e.isAutoClosed()) {
+                        resetTimeout();
                     }
                 });
             }
@@ -86,12 +83,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
             IdleAlarmMessageUtil.setMessageToHtml(message, getState().contentMode, overlayLabel);
 
             if(!overlay.isShowing()) {
-                overlay.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-                    @Override
-                    public void setPosition(int offsetWidth, int offsetHeight) {
-                        int windowWidth = Window.getClientWidth();
-                        overlay.setPopupPosition((windowWidth - offsetWidth) / 2, 0);
-                    }
+                overlay.setPopupPositionAndShow((offsetWidth, offsetHeight) -> {
+                    int windowWidth = Window.getClientWidth();
+                    overlay.setPopupPosition((windowWidth - offsetWidth) / 2, 0);
                 });
             }
         } else if(overlay != null) {
