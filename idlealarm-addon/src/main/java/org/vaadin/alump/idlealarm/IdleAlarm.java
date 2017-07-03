@@ -230,7 +230,6 @@ public class IdleAlarm extends AbstractExtension {
 
     /**
      * Show/hide button for immediately redirecting into URL given in #setTimeoutRedirectURL
-     * The button is shown if and only if the #getTimeoutRedirectURL(String) != null
      *
      * @param redirectButtonEnabled
      * @return
