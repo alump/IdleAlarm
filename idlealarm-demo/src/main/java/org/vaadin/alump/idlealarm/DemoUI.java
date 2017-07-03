@@ -72,7 +72,7 @@ public class DemoUI extends UI {
         row.setCaption("Setup warning message (values can be modified only in disabled state)");
 
         final TextField secondsBefore = new TextField("Seconds");
-        secondsBefore.setValue("40");
+        secondsBefore.setValue("50");
         secondsBefore.setWidth(60, Unit.PIXELS);
         row.addComponent(secondsBefore);
 
@@ -99,7 +99,9 @@ public class DemoUI extends UI {
         row= createRow(layout);
         CheckBox liveCountDownEnabled = new CheckBox("Live seconds timeout counter enabled");
         liveCountDownEnabled.setValue(false);
-        row.addComponents(liveCountDownEnabled);
+        TextField timeoutURLField = new TextField("URL where to redirect after timeout");
+        timeoutURLField.setValue("https://www.google.com");
+        row.addComponents(liveCountDownEnabled, timeoutURLField);
 
         enableButton.addClickListener(event -> {
             enableButton.setEnabled(false);
@@ -108,11 +110,13 @@ public class DemoUI extends UI {
             warningMessage.setEnabled(false);
             contentMode.setEnabled(false);
             liveCountDownEnabled.setEnabled(false);
+            timeoutURLField.setEnabled(false);
 
             IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
                     .setMessage(warningMessage.getValue())
                     .setContentMode((ContentMode) contentMode.getValue())
-                    .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue());
+                    .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue())
+                    .setTimeoutRedirectURL(timeoutURLField.getValue());
         });
 
         disableButton.addClickListener(event -> {
@@ -122,6 +126,8 @@ public class DemoUI extends UI {
             warningMessage.setEnabled(true);
             contentMode.setEnabled(true);
             liveCountDownEnabled.setEnabled(true);
+            timeoutURLField.setEnabled(true);
+
             IdleAlarm.unload();
         });
 
