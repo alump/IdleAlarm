@@ -167,4 +167,24 @@ public class IdleAlarm extends AbstractExtension {
     public String getMessage() {
         return getState().message;
     }
+
+    /**
+     * Show IdleAlarmFormatting.SECS_TO_TIMEOUT with live seconds counting dow to 0.
+     *
+     * @param enabled
+     * @return
+     */
+    public IdleAlarm setLiveTimeoutSecondsEnabled(boolean enabled) {
+        getState().liveTimeoutSecondsEnabled = enabled;
+        return this;
+    }
+
+    /**
+     * @see #setLiveTimeoutSecondsEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isLiveTimeoutSecondsEnabled() {
+        return getState().liveTimeoutSecondsEnabled;
+    }
 }
