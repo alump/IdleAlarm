@@ -10,7 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>8.0.2</vaadin.version>
+        <vaadin.version>8.1.0.beta3</vaadin.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
     </properties>
@@ -46,6 +46,10 @@
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
         <repository>
+            <id>vaadin-pre</id>
+            <url>http://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
+        <repository>
             <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
             <releases>
@@ -67,6 +71,10 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>vaadin-pre</id>
+            <url>http://maven.vaadin.com/vaadin-prereleases</url>
         </pluginRepository>
     </pluginRepositories>
 
