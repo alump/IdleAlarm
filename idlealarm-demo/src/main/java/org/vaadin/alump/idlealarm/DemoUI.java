@@ -120,9 +120,11 @@ public class DemoUI extends UI {
                     .setMessage(warningMessage.getValue())
                     .setContentMode((ContentMode) contentMode.getValue())
                     .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue())
-                    .setTimeoutRedirectURL(timeoutURLField.getValue())
+                    .setTimeoutRedirectURL("")
                     .setCloseButtonEnabled(closeButtonEnabled.getValue())
-                    .setRedirectButtonEnabled(redirectButtonEnabled.getValue());
+                    .setRedirectButtonEnabled(redirectButtonEnabled.getValue()).addRedirectListener(()-> {
+                        System.out.println("*** redirect happened ***");
+                    });
         });
 
         disableButton.addClickListener(event -> {
