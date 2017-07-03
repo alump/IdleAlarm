@@ -1,11 +1,15 @@
 package org.vaadin.alump.idlealarm;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.Extension;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.UI;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmState;
+import org.vaadin.alump.idlealarm.client.shared.RedirectServerRpc;
 import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
 
 /**
@@ -15,6 +19,8 @@ public class IdleAlarm extends AbstractExtension {
 
     public static final String DEFAULT_FORMATTING = "Your session will expire in less than "
             + IdleAlarmFormatting.SECS_TO_TIMEOUT + " seconds. Please click anywhere to extend session.";
+
+    private Collection<RedirectListener> redirectListeners = new ArrayList<>();
 
     protected IdleAlarm(UI ui) {
         setMessage(DEFAULT_FORMATTING);
@@ -32,6 +38,14 @@ public class IdleAlarm extends AbstractExtension {
             @Override
             public void resetIdleTimeout() {
                 //ignored, call is just to reset timeout
+            }
+        });
+
+        // For notifying server-side when redirect happened
+        registerRpc(new RedirectServerRpc() {
+            @Override
+            public void redirected() {
+                redirectListeners.forEach(RedirectListener::redirected);
             }
         });
     }
@@ -287,4 +301,38 @@ public class IdleAlarm extends AbstractExtension {
     public String getRedirectButtonCaption() {
         return getState().redirectButtonCaption;
     }
+
+    /**
+     * Add listener for redirect events
+     *
+     * @param redirectListener
+     * @return
+     */
+    public IdleAlarm addRedirectListener(RedirectListener redirectListener) {
+        redirectListeners.add(redirectListener);
+        return this;
+    }
+
+    /**
+     * @see #addRedirectListener(RedirectListener)
+     *
+     * @param redirectListener
+     * @return
+     */
+    public IdleAlarm removeRedirectListener(RedirectListener redirectListener) {
+        redirectListeners.remove(redirectListener);
+        return this;
+    }
+
+    /**
+     * Listener for redirect events
+     */
+    public interface RedirectListener {
+
+        /**
+         * Redirect happened
+         */
+        void redirected();
+    }
+
 }

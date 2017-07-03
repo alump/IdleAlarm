@@ -17,6 +17,7 @@ import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.ui.VOverlay;
 import com.vaadin.shared.ui.Connect;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmState;
+import org.vaadin.alump.idlealarm.client.shared.RedirectServerRpc;
 import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
 
 /**
@@ -130,7 +131,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
             if (getState().liveTimeoutSecondsEnabled) {
                 scheduleLiveSecondsToTimeoutUpdater(event);
             }
-            if (hasRedirectURL()) {
+            if (getState().timeoutRedirectURL!=null) {
                 scheduleTimeoutRedirect(event.getSecondsToTimeout()*1000);
             }
 
@@ -157,7 +158,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         redirectButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.Location.assign(getState().timeoutRedirectURL);
+                redirectToRedirectUrl(true);
             }
         });
     }
@@ -181,9 +182,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         redirectTimer = new Timer() {
             @Override
             public void run() {
-                if (isOverlayShowing()) {
-                    Window.Location.assign(getState().timeoutRedirectURL);
-                }
+                redirectToRedirectUrl(false);
             }};
         redirectTimer.schedule(timeoutMs);
     }
@@ -211,11 +210,16 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         getRpcProxy(ResetTimeoutServerRpc.class).resetIdleTimeout();
     }
 
-    private boolean hasRedirectURL() {
-        return getState().timeoutRedirectURL!=null && !getState().timeoutRedirectURL.isEmpty();
-    }
-
     private boolean isOverlayShowing() {
         return overlay != null && overlay.isShowing();
+    }
+
+    private void redirectToRedirectUrl(boolean manualRedirect) {
+        if (manualRedirect) {
+            // only for a manual redirect, in case of an automatic redirect UI is already closed
+            RedirectServerRpc rpc = getRpcProxy(RedirectServerRpc.class);
+            rpc.redirected();
+        }
+        Window.Location.assign(getState().timeoutRedirectURL);
     }
 }
