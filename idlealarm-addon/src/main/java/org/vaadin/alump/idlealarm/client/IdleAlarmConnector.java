@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -33,6 +34,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
     private HTML overlayLabel;
     private Button closeButton;
     private Button redirectButton;
+    private Timer redirectTimer;
 
     @Override
     public IdleAlarmState getState() {
@@ -95,7 +97,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
                     createCloseButton();
                     overlayContent.add(closeButton);
                 }
-                if (getState().redirectButtonEnabled && hasRedirectURL()) {
+                if (getState().redirectButtonEnabled) {
                     createRedirectButton();
                     overlayContent.add(redirectButton);
                 }
@@ -149,7 +151,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         redirectButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.Location.replace(getState().timeoutRedirectURL);
+                Window.Location.assign(getState().timeoutRedirectURL);
             }
         });
     }
@@ -170,15 +172,14 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
     }
 
     private void scheduleTimeoutRedirect(int timeoutMs) {
-        Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+        redirectTimer = new Timer() {
             @Override
-            public boolean execute() {
+            public void run() {
                 if (isOverlayShowing()) {
-                    Window.Location.replace(getState().timeoutRedirectURL);
+                    Window.Location.assign(getState().timeoutRedirectURL);
                 }
-                return false;
-            }
-        }, timeoutMs);
+            }};
+        redirectTimer.schedule(timeoutMs);
     }
 
     private void closeOverlay() {
@@ -187,6 +188,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
             overlay.hide(false);
             overlay.removeFromParent();
             overlay = null;
+        }
+        if (redirectTimer!=null) {
+            redirectTimer.cancel();
         }
     }
 
@@ -202,7 +206,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
     }
 
     private boolean hasRedirectURL() {
-        return getState().timeoutRedirectURL!=null && getState().timeoutRedirectURL.length()>3;
+        return getState().timeoutRedirectURL!=null && !getState().timeoutRedirectURL.isEmpty();
     }
 
     private boolean isOverlayShowing() {
