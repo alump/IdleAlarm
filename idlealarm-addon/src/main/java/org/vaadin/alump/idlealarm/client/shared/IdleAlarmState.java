@@ -22,4 +22,11 @@ public class IdleAlarmState extends SharedState {
 
     public String timeoutRedirectURL;
 
+    public boolean closeButtonEnabled;
+
+    public boolean redirectButtonEnabled;
+
+    public String closeButtonCaption = "Close";
+
+    public String redirectButtonCaption = "Redirect";
 }

@@ -6,6 +6,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -30,6 +31,8 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
 
     private VOverlay overlay;
     private HTML overlayLabel;
+    private Button closeButton;
+    private Button redirectButton;
 
     @Override
     public IdleAlarmState getState() {
@@ -87,6 +90,16 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
                 overlayLabel = new HTML();
                 overlayLabel.addStyleName("idle-alarm-message");
                 overlayContent.add(overlayLabel);
+
+                if (getState().closeButtonEnabled) {
+                    createCloseButton();
+                    overlayContent.add(closeButton);
+                }
+                if (getState().redirectButtonEnabled && hasRedirectURL()) {
+                    createRedirectButton();
+                    overlayContent.add(redirectButton);
+                }
+
                 // Use UI as owner
                 overlay.setOwner(getConnection().getUIConnector().getWidget());
                 overlay.addCloseHandler(new CloseHandler<PopupPanel>() {
@@ -122,6 +135,29 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         } else if(overlay != null) {
             closeOverlay();
         }
+    }
+
+    private void createCloseButton() {
+        closeButton = new Button(getState().closeButtonCaption);
+        closeButton.addStyleName("close-button");
+        closeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                closeOverlay();
+                resetTimeout();
+            }
+        });
+    }
+
+    private void createRedirectButton() {
+        redirectButton = new Button(getState().redirectButtonCaption);
+        redirectButton.addStyleName("redirect-button");
+        redirectButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.Location.replace(getState().timeoutRedirectURL);
+            }
+        });
     }
 
     private void scheduleLiveSecondsToTimeoutUpdater(IdleTimeoutClientUtil.IdleTimeoutUpdateEvent event) {

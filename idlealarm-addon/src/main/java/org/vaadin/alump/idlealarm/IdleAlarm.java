@@ -208,4 +208,84 @@ public class IdleAlarm extends AbstractExtension {
         return getState().timeoutRedirectURL;
     }
 
+    /**
+     * Shows/hides button for closing notification and resetting timer
+     *
+     * @param closeButtonEnabled
+     * @return
+     */
+    public IdleAlarm setCloseButtonEnabled(boolean closeButtonEnabled) {
+        getState().closeButtonEnabled = closeButtonEnabled;
+        return this;
+    }
+
+    /**
+     * @see #setCloseButtonEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isCloseButtonEnabled() {
+        return getState().closeButtonEnabled;
+    }
+
+    /**
+     * Show/hide button for immediately redirecting into URL given in #setTimeoutRedirectURL
+     * The button is shown if and only if the #getTimeoutRedirectURL(String) != null
+     *
+     * @param redirectButtonEnabled
+     * @return
+     */
+    public IdleAlarm setRedirectButtonEnabled(boolean redirectButtonEnabled) {
+        getState().redirectButtonEnabled = redirectButtonEnabled;
+        return this;
+    }
+
+    /**
+     * @see #setRedirectButtonEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isRedirectButtonEnabled() {
+        return getState().redirectButtonEnabled;
+    }
+
+    /**
+     * Set caption for close button
+     *
+     * @param closeButtonCaption
+     * @return
+     */
+    public IdleAlarm setCloseButtonCaption(String closeButtonCaption) {
+        getState().closeButtonCaption = closeButtonCaption;
+        return this;
+    }
+
+    /**
+     * @see #setCloseButtonCaption(String)
+     *
+     * @return
+     */
+    public String getCloseButtonCaption() {
+        return getState().closeButtonCaption;
+    }
+
+    /**
+     * Set caption for redirect button
+     *
+     * @param redirectButtonCaption
+     * @return
+     */
+    public IdleAlarm setRedirectButtonCaption(String redirectButtonCaption) {
+        getState().redirectButtonCaption = redirectButtonCaption;
+        return this;
+    }
+
+    /**
+     * @see #setRedirectButtonCaption(String)
+     *
+     * @return
+     */
+    public String getRedirectButtonCaption() {
+        return getState().redirectButtonCaption;
+    }
 }
