@@ -17,4 +17,7 @@ public class IdleAlarmState extends SharedState {
     public ContentMode contentMode = ContentMode.TEXT;
 
     public String extendCaption = "Extend sessions";
+
+    public boolean liveTimeoutSecondsEnabled;
+
 }

@@ -94,16 +94,23 @@ public class DemoUI extends UI {
         row.addComponent(disableButton);
         row.setComponentAlignment(disableButton, Alignment.TOP_LEFT);
 
+        row= createRow(layout);
+        CheckBox liveCountDownEnabled = new CheckBox("Live seconds timeout counter enabled");
+        liveCountDownEnabled.setValue(false);
+        row.addComponents(liveCountDownEnabled);
+
         enableButton.addClickListener(event -> {
             enableButton.setEnabled(false);
             disableButton.setEnabled(true);
             secondsBefore.setEnabled(false);
             warningMessage.setEnabled(false);
             contentMode.setEnabled(false);
+            liveCountDownEnabled.setEnabled(false);
 
             IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
                     .setMessage(warningMessage.getValue())
-                    .setContentMode((ContentMode) contentMode.getValue());
+                    .setContentMode((ContentMode) contentMode.getValue())
+                    .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue());
         });
 
         disableButton.addClickListener(event -> {
@@ -112,7 +119,7 @@ public class DemoUI extends UI {
             secondsBefore.setEnabled(true);
             warningMessage.setEnabled(true);
             contentMode.setEnabled(true);
-
+            liveCountDownEnabled.setEnabled(true);
             IdleAlarm.unload();
         });
 

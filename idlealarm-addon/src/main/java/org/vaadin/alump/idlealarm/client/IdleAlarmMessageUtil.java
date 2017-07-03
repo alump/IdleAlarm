@@ -12,10 +12,14 @@ import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 public class IdleAlarmMessageUtil {
 
     public static String format(String formatting, IdleTimeoutClientUtil.IdleTimeoutUpdateEvent event) {
+        return format(formatting, event.getSecondsToTimeout(), event.getSecondsSinceReset(), event.getMaxInactiveInterval());
+    }
+
+    public static String format(String formatting, int secondsToTimeout, int secondsSinceReset, int maxInactiveInterval) {
         String message = formatting;
-        message = message.replaceAll(IdleAlarmFormatting.SECS_TO_TIMEOUT, "" + event.getSecondsToTimeout());
-        message = message.replaceAll(IdleAlarmFormatting.SECS_SINCE_RESET, "" + event.getSecondsSinceReset());
-        message = message.replaceAll(IdleAlarmFormatting.SECS_MAX_IDLE_TIMEOUT, "" + event.getMaxInactiveInterval());
+        message = message.replaceAll(IdleAlarmFormatting.SECS_TO_TIMEOUT, "" + secondsToTimeout);
+        message = message.replaceAll(IdleAlarmFormatting.SECS_SINCE_RESET, "" + secondsSinceReset);
+        message = message.replaceAll(IdleAlarmFormatting.SECS_MAX_IDLE_TIMEOUT, "" + maxInactiveInterval);
         return message;
     }
 
