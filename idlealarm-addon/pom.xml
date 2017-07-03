@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.alump.idlealarm</groupId>
 	<artifactId>idlealarm-addon</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.2.0</version>
+	<version>0.3.0</version>
 	<name>IdleAlarm</name>
 
 	<properties>
