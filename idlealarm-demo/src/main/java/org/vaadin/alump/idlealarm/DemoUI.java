@@ -101,7 +101,9 @@ public class DemoUI extends UI {
         liveCountDownEnabled.setValue(false);
         TextField timeoutURLField = new TextField("URL where to redirect after timeout");
         timeoutURLField.setValue("https://www.google.com");
-        row.addComponents(liveCountDownEnabled, timeoutURLField);
+        CheckBox closeButtonEnabled = new CheckBox("Close button enabled");
+        CheckBox redirectButtonEnabled = new CheckBox("Redirect button enabled");
+        row.addComponents(liveCountDownEnabled, timeoutURLField, closeButtonEnabled, redirectButtonEnabled);
 
         enableButton.addClickListener(event -> {
             enableButton.setEnabled(false);
@@ -111,12 +113,16 @@ public class DemoUI extends UI {
             contentMode.setEnabled(false);
             liveCountDownEnabled.setEnabled(false);
             timeoutURLField.setEnabled(false);
+            closeButtonEnabled.setEnabled(false);
+            redirectButtonEnabled.setEnabled(false);
 
             IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
                     .setMessage(warningMessage.getValue())
                     .setContentMode((ContentMode) contentMode.getValue())
                     .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue())
-                    .setTimeoutRedirectURL(timeoutURLField.getValue());
+                    .setTimeoutRedirectURL(timeoutURLField.getValue())
+                    .setCloseButtonEnabled(closeButtonEnabled.getValue())
+                    .setRedirectButtonEnabled(redirectButtonEnabled.getValue());
         });
 
         disableButton.addClickListener(event -> {
@@ -127,7 +133,8 @@ public class DemoUI extends UI {
             contentMode.setEnabled(true);
             liveCountDownEnabled.setEnabled(true);
             timeoutURLField.setEnabled(true);
-
+            closeButtonEnabled.setEnabled(true);
+            redirectButtonEnabled.setEnabled(true);
             IdleAlarm.unload();
         });
 

@@ -13,7 +13,6 @@
       background-color: $idlealarm-bgcolor;
       padding: $idlealarm-padding;
       border: $idlealarm-border;
-      pointer-events: none;
 
       .idle-alarm-message {
         color: $idlealarm-color;
@@ -23,7 +22,18 @@
         }
       }
 
-    }
+      .clickable-container {
+        height: 55px;
+      }
 
+      .close-button {
+        float: right;
+      }
+
+      .redirect-button {
+        float: right;
+        margin-right: 5px;
+      }
+    }
   }
 }
