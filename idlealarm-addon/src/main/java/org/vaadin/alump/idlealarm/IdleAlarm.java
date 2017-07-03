@@ -187,4 +187,25 @@ public class IdleAlarm extends AbstractExtension {
     public boolean isLiveTimeoutSecondsEnabled() {
         return getState().liveTimeoutSecondsEnabled;
     }
+
+    /**
+     * URL where to redirect when timeout happens, if timeoutRedirectURL == null, then do not redirect
+     *
+     * @param timeoutRedirectURL
+     * @return
+     */
+    public IdleAlarm setTimeoutRedirectURL(String timeoutRedirectURL) {
+        getState().timeoutRedirectURL = timeoutRedirectURL;
+        return this;
+    }
+
+    /**
+     * @see #setTimeoutRedirectURL(String)
+     *
+     * @return
+     */
+    public String getTimeoutRedirectURL() {
+        return getState().timeoutRedirectURL;
+    }
+
 }

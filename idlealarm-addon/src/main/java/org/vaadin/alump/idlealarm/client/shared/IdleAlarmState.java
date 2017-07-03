@@ -20,4 +20,6 @@ public class IdleAlarmState extends SharedState {
 
     public boolean liveTimeoutSecondsEnabled;
 
+    public String timeoutRedirectURL;
+
 }

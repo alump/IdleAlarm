@@ -115,6 +115,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
             if (getState().liveTimeoutSecondsEnabled) {
                 scheduleLiveSecondsToTimeoutUpdater(event);
             }
+            if (hasRedirectURL()) {
+                scheduleTimeoutRedirect(event.getSecondsToTimeout()*1000);
+            }
 
         } else if(overlay != null) {
             closeOverlay();
@@ -136,6 +139,18 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         }, 1000);
     }
 
+    private void scheduleTimeoutRedirect(int timeoutMs) {
+        Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                if (isOverlayShowing()) {
+                    Window.Location.replace(getState().timeoutRedirectURL);
+                }
+                return false;
+            }
+        }, timeoutMs);
+    }
+
     private void closeOverlay() {
         if(overlay != null) {
             // Hide non-autoclosed to prevent timeout reset
@@ -154,6 +169,10 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
 
     protected void resetTimeout() {
         getRpcProxy(ResetTimeoutServerRpc.class).resetIdleTimeout();
+    }
+
+    private boolean hasRedirectURL() {
+        return getState().timeoutRedirectURL!=null && getState().timeoutRedirectURL.length()>3;
     }
 
     private boolean isOverlayShowing() {
