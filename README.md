@@ -31,11 +31,12 @@ http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
-### Version 0.3.0 (2017-07-03)
+### Version 0.3.0 (2017-07-04)
 Thanks to Johannes Tuikkala for these new features:
 - Live seconds session timeout count down for the caption
 - Automatic redirect to an optional url after timeout
 - Close and redirect buttons
+- Server-side redirect button listener
 
 ### Version 0.2.0 (2017-03-15)
 - Vaadin 8 support
