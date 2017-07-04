@@ -1,6 +1,6 @@
-# IdleAlarm Add-on for Vaadin 7
+# IdleAlarm Add-on for Vaadin
 
-[![Build Status](http://siika.fi:8888/jenkins/job/IdleAlarm%20(Vaadin)/badge/icon)](http://siika.fi:8888/jenkins/job/IdleAlarm%20(Vaadin)/)
+[![Build Status](https://epic.siika.fi/jenkins/job/IdleAlarm%20(Vaadin)/badge/icon)](https://epic.siika.fi/jenkins/job/IdleAlarm%20(Vaadin)/)
 
 IdleAlarm is Vaadin add-on designed to be used with Vaadin's idle timeout feature. It adds alarm that is shown to user
 before sessions gets removed because of long idling. Message shown to user, and how long before idle expire it's shown,
@@ -30,6 +30,12 @@ Official releases of this add-on are available at Vaadin Directory. For Maven in
 http://vaadin.com/addon/idlealarm
 
 ## Release notes
+
+### Version 0.3.0 (2017-07-03)
+Thanks to Johannes Tuikkala for these new features:
+- Live seconds session timeout count down for the caption
+- Automatic redirect to an optional url after timeout
+- Close and redirect buttons
 
 ### Version 0.2.0 (2017-03-15)
 - Vaadin 8 support
