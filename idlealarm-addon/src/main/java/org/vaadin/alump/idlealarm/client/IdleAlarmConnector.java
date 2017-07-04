@@ -1,19 +1,24 @@
 package org.vaadin.alump.idlealarm.client;
 
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
+import java.util.logging.Logger;
+
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.ui.VOverlay;
 import com.vaadin.shared.ui.Connect;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmState;
+import org.vaadin.alump.idlealarm.client.shared.RedirectServerRpc;
 import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
-
-import java.util.logging.Logger;
 
 /**
  * IdleAlarm connector presenting warnings before idle timeout happens
@@ -28,6 +33,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
 
     private VOverlay overlay;
     private HTML overlayLabel;
+    private Button closeButton;
+    private Button redirectButton;
+    private Timer redirectTimer;
 
     @Override
     public IdleAlarmState getState() {
@@ -64,12 +72,37 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
     public void onIdleTimeoutUpdate(IdleTimeoutClientUtil.IdleTimeoutUpdateEvent event) {
         if (event.getSecondsToTimeout() <= getState().secondsBefore && event.getSecondsToTimeout() > 0) {
             if(overlay == null) {
+                FocusPanel clickableContainer = new FocusPanel();
+                FlowPanel overlayContent = new FlowPanel();
+
                 overlay = new VOverlay();
                 overlay.setAutoHideEnabled(true);
                 overlay.addStyleName("idle-alarm-popup");
+                overlay.add(clickableContainer);
+
+                clickableContainer.add(overlayContent);
+                clickableContainer.addStyleName("clickable-container");
+                clickableContainer.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        resetTimeout();
+                        closeOverlay();
+                    }
+                });
+
                 overlayLabel = new HTML();
                 overlayLabel.addStyleName("idle-alarm-message");
-                overlay.add(overlayLabel);
+                overlayContent.add(overlayLabel);
+
+                if (getState().closeButtonEnabled) {
+                    createCloseButton();
+                    overlayContent.add(closeButton);
+                }
+                if (getState().redirectButtonEnabled) {
+                    createRedirectButton();
+                    overlayContent.add(redirectButton);
+                }
+
                 // Use UI as owner
                 overlay.setOwner(getConnection().getUIConnector().getWidget());
                 overlay.addCloseHandler(e -> {
@@ -88,9 +121,64 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
                     overlay.setPopupPosition((windowWidth - offsetWidth) / 2, 0);
                 });
             }
+
+            if (getState().liveTimeoutSecondsEnabled) {
+                scheduleLiveSecondsToTimeoutUpdater(event);
+            }
+            if (getState().timeoutRedirectURL!=null) {
+                scheduleTimeoutRedirect(event.getSecondsToTimeout()*1000);
+            }
+
         } else if(overlay != null) {
             closeOverlay();
         }
+    }
+
+    private void createCloseButton() {
+        closeButton = new Button(getState().closeButtonCaption);
+        closeButton.addStyleName("close-button");
+        closeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                closeOverlay();
+                resetTimeout();
+            }
+        });
+    }
+
+    private void createRedirectButton() {
+        redirectButton = new Button(getState().redirectButtonCaption);
+        redirectButton.addStyleName("redirect-button");
+        redirectButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                redirectToRedirectUrl(true);
+            }
+        });
+    }
+
+    private void scheduleLiveSecondsToTimeoutUpdater(IdleTimeoutClientUtil.IdleTimeoutUpdateEvent event) {
+        Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                int secondsToTimeout = timeoutUtil.secondsToIdleTimeout(IdleTimeoutClientUtil.getUnixTimeStamp());
+                if (secondsToTimeout >= 0 && isOverlayShowing()) {
+                    String msg = IdleAlarmMessageUtil.format(getState().message, secondsToTimeout, event.getSecondsSinceReset(), event.getMaxInactiveInterval());
+                    IdleAlarmMessageUtil.setMessageToHtml(msg, getState().contentMode, overlayLabel);
+                    return true;
+                }
+                return false;
+            }
+        }, 1000);
+    }
+
+    private void scheduleTimeoutRedirect(int timeoutMs) {
+        redirectTimer = new Timer() {
+            @Override
+            public void run() {
+                redirectToRedirectUrl(false);
+            }};
+        redirectTimer.schedule(timeoutMs);
     }
 
     private void closeOverlay() {
@@ -99,6 +187,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
             overlay.hide(false);
             overlay.removeFromParent();
             overlay = null;
+        }
+        if (redirectTimer!=null) {
+            redirectTimer.cancel();
         }
     }
 
@@ -111,5 +202,18 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
 
     protected void resetTimeout() {
         getRpcProxy(ResetTimeoutServerRpc.class).resetIdleTimeout();
+    }
+
+    private boolean isOverlayShowing() {
+        return overlay != null && overlay.isShowing();
+    }
+
+    private void redirectToRedirectUrl(boolean manualRedirect) {
+        if (manualRedirect) {
+            // only for a manual redirect, in case of an automatic redirect UI is already closed
+            RedirectServerRpc rpc = getRpcProxy(RedirectServerRpc.class);
+            rpc.redirected();
+        }
+        Window.Location.assign(getState().timeoutRedirectURL);
     }
 }

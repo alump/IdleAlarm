@@ -1,11 +1,15 @@
 package org.vaadin.alump.idlealarm;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.Extension;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.UI;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmState;
+import org.vaadin.alump.idlealarm.client.shared.RedirectServerRpc;
 import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
 
 /**
@@ -15,6 +19,8 @@ public class IdleAlarm extends AbstractExtension {
 
     public static final String DEFAULT_FORMATTING = "Your session will expire in less than "
             + IdleAlarmFormatting.SECS_TO_TIMEOUT + " seconds. Please click anywhere to extend session.";
+
+    private Collection<RedirectListener> redirectListeners = new ArrayList<>();
 
     protected IdleAlarm(UI ui) {
         setMessage(DEFAULT_FORMATTING);
@@ -32,6 +38,14 @@ public class IdleAlarm extends AbstractExtension {
             @Override
             public void resetIdleTimeout() {
                 //ignored, call is just to reset timeout
+            }
+        });
+
+        // For notifying server-side when redirect happened
+        registerRpc(new RedirectServerRpc() {
+            @Override
+            public void redirected() {
+                redirectListeners.forEach(RedirectListener::redirected);
             }
         });
     }
@@ -167,4 +181,158 @@ public class IdleAlarm extends AbstractExtension {
     public String getMessage() {
         return getState().message;
     }
+
+    /**
+     * Show IdleAlarmFormatting.SECS_TO_TIMEOUT with live seconds counting dow to 0.
+     *
+     * @param enabled
+     * @return
+     */
+    public IdleAlarm setLiveTimeoutSecondsEnabled(boolean enabled) {
+        getState().liveTimeoutSecondsEnabled = enabled;
+        return this;
+    }
+
+    /**
+     * @see #setLiveTimeoutSecondsEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isLiveTimeoutSecondsEnabled() {
+        return getState().liveTimeoutSecondsEnabled;
+    }
+
+    /**
+     * URL where to redirect when timeout happens, if timeoutRedirectURL == null, then do not redirect
+     *
+     * @param timeoutRedirectURL
+     * @return
+     */
+    public IdleAlarm setTimeoutRedirectURL(String timeoutRedirectURL) {
+        getState().timeoutRedirectURL = timeoutRedirectURL;
+        return this;
+    }
+
+    /**
+     * @see #setTimeoutRedirectURL(String)
+     *
+     * @return
+     */
+    public String getTimeoutRedirectURL() {
+        return getState().timeoutRedirectURL;
+    }
+
+    /**
+     * Shows/hides button for closing notification and resetting timer
+     *
+     * @param closeButtonEnabled
+     * @return
+     */
+    public IdleAlarm setCloseButtonEnabled(boolean closeButtonEnabled) {
+        getState().closeButtonEnabled = closeButtonEnabled;
+        return this;
+    }
+
+    /**
+     * @see #setCloseButtonEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isCloseButtonEnabled() {
+        return getState().closeButtonEnabled;
+    }
+
+    /**
+     * Show/hide button for immediately redirecting into URL given in #setTimeoutRedirectURL
+     *
+     * @param redirectButtonEnabled
+     * @return
+     */
+    public IdleAlarm setRedirectButtonEnabled(boolean redirectButtonEnabled) {
+        getState().redirectButtonEnabled = redirectButtonEnabled;
+        return this;
+    }
+
+    /**
+     * @see #setRedirectButtonEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isRedirectButtonEnabled() {
+        return getState().redirectButtonEnabled;
+    }
+
+    /**
+     * Set caption for close button
+     *
+     * @param closeButtonCaption
+     * @return
+     */
+    public IdleAlarm setCloseButtonCaption(String closeButtonCaption) {
+        getState().closeButtonCaption = closeButtonCaption;
+        return this;
+    }
+
+    /**
+     * @see #setCloseButtonCaption(String)
+     *
+     * @return
+     */
+    public String getCloseButtonCaption() {
+        return getState().closeButtonCaption;
+    }
+
+    /**
+     * Set caption for redirect button
+     *
+     * @param redirectButtonCaption
+     * @return
+     */
+    public IdleAlarm setRedirectButtonCaption(String redirectButtonCaption) {
+        getState().redirectButtonCaption = redirectButtonCaption;
+        return this;
+    }
+
+    /**
+     * @see #setRedirectButtonCaption(String)
+     *
+     * @return
+     */
+    public String getRedirectButtonCaption() {
+        return getState().redirectButtonCaption;
+    }
+
+    /**
+     * Add listener for redirect events
+     *
+     * @param redirectListener
+     * @return
+     */
+    public IdleAlarm addRedirectListener(RedirectListener redirectListener) {
+        redirectListeners.add(redirectListener);
+        return this;
+    }
+
+    /**
+     * @see #addRedirectListener(RedirectListener)
+     *
+     * @param redirectListener
+     * @return
+     */
+    public IdleAlarm removeRedirectListener(RedirectListener redirectListener) {
+        redirectListeners.remove(redirectListener);
+        return this;
+    }
+
+    /**
+     * Listener for redirect events
+     */
+    public interface RedirectListener {
+
+        /**
+         * Redirect happened
+         */
+        void redirected();
+    }
+
 }

@@ -72,7 +72,7 @@ public class DemoUI extends UI {
         row.setCaption("Setup warning message (values can be modified only in disabled state)");
 
         final TextField secondsBefore = new TextField("Seconds");
-        secondsBefore.setValue("40");
+        secondsBefore.setValue("50");
         secondsBefore.setWidth(60, Unit.PIXELS);
         row.addComponent(secondsBefore);
 
@@ -96,16 +96,35 @@ public class DemoUI extends UI {
         row.addComponent(disableButton);
         row.setComponentAlignment(disableButton, Alignment.TOP_LEFT);
 
+        row= createRow(layout);
+        CheckBox liveCountDownEnabled = new CheckBox("Live seconds timeout counter enabled");
+        liveCountDownEnabled.setValue(false);
+        TextField timeoutURLField = new TextField("URL where to redirect after timeout");
+        timeoutURLField.setValue("https://www.google.com");
+        CheckBox closeButtonEnabled = new CheckBox("Close button enabled");
+        CheckBox redirectButtonEnabled = new CheckBox("Redirect button enabled");
+        row.addComponents(liveCountDownEnabled, timeoutURLField, closeButtonEnabled, redirectButtonEnabled);
+
         enableButton.addClickListener(event -> {
             enableButton.setEnabled(false);
             disableButton.setEnabled(true);
             secondsBefore.setEnabled(false);
             warningMessage.setEnabled(false);
             contentMode.setEnabled(false);
+            liveCountDownEnabled.setEnabled(false);
+            timeoutURLField.setEnabled(false);
+            closeButtonEnabled.setEnabled(false);
+            redirectButtonEnabled.setEnabled(false);
 
             IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
                     .setMessage(warningMessage.getValue())
-                    .setContentMode((ContentMode) contentMode.getValue());
+                    .setContentMode((ContentMode) contentMode.getValue())
+                    .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue())
+                    .setTimeoutRedirectURL("")
+                    .setCloseButtonEnabled(closeButtonEnabled.getValue())
+                    .setRedirectButtonEnabled(redirectButtonEnabled.getValue()).addRedirectListener(()-> {
+                        System.out.println("*** redirect happened ***");
+                    });
         });
 
         disableButton.addClickListener(event -> {
@@ -114,7 +133,10 @@ public class DemoUI extends UI {
             secondsBefore.setEnabled(true);
             warningMessage.setEnabled(true);
             contentMode.setEnabled(true);
-
+            liveCountDownEnabled.setEnabled(true);
+            timeoutURLField.setEnabled(true);
+            closeButtonEnabled.setEnabled(true);
+            redirectButtonEnabled.setEnabled(true);
             IdleAlarm.unload();
         });
 

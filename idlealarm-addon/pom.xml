@@ -5,12 +5,12 @@
 	<groupId>org.vaadin.alump.idlealarm</groupId>
 	<artifactId>idlealarm-addon</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.2.0</version>
+	<version>0.3.0</version>
 	<name>IdleAlarm</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>8.0.2</vaadin.version>
+		<vaadin.version>8.0.6</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 
 		<!-- ZIP Manifest fields -->
