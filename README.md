@@ -31,7 +31,9 @@ http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
-### Version 0.3.0 (2017-07-04)
+### Version 0.3.0 (SOON)
+I need to do some API modifications before I can release this. Current API is not suitable for generic use.
+
 Thanks to Johannes Tuikkala for these new features:
 - Live seconds session timeout count down for the caption
 - Automatic redirect to an optional url after timeout
