@@ -15,8 +15,8 @@ Try the add-on demo at http://app.siika.fi/IdleAlarmDemo
 // Show default warning 60s before session will be expired
 IdleAlarm.get().setSecondsBefore(60);
 
-// Or construct your own message
-IdleAlarm.get().setSecondsBefore(60)
+// Or construct your own message and enable countdown
+IdleAlarm.get().setSecondsBefore(60).setCountdown(true)
     .setMessage("Your session will expire in less than "
         + IdleAlarmFormatting.SECS_TO_TIMEOUT
         + " seconds. Please click anywhere to extend session.");
@@ -35,7 +35,8 @@ http://vaadin.com/addon/idlealarm
 - Add countdown update logic to client side warning (by Johannes Tuikkala)
 - Add support for optional close button (by Johannes Tuikkala)
 - Add events to performed at timeout: reload and redirect (by Johannes Tuikkala)
-- Add server side API for additional buttons, and easy API to add redirect and reload buttons
+- Add server side API for additional buttons (eg. redirect and reload), and easy API to add redirect and reload buttons.
+Clicking these button will extend session automatically.
 - Version 0.3.0 was skipped because of reasons™
 
 ### Version 0.2.0 (2017-03-15)
