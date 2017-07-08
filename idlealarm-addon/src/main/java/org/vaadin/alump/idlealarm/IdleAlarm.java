@@ -1,12 +1,13 @@
 package org.vaadin.alump.idlealarm;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.Extension;
+import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.UI;
 import org.vaadin.alump.idlealarm.client.shared.*;
@@ -26,7 +27,9 @@ public class IdleAlarm extends AbstractExtension {
             + IdleAlarmFormatting.SECS_TO_TIMEOUT
             + " seconds. Please click anywhere outside this notification to extend session.";
 
-    private Collection<RedirectListener> redirectListeners = new ArrayList<>();
+    private Map<Integer,IdleClickListener> buttonListeners = new HashMap<>();
+    private AtomicInteger buttonCounter = new AtomicInteger(0);
+    //private AtomicInteger resourceCounter = new AtomicInteger(0);
 
     protected IdleAlarm(UI ui) {
         setMessage(DEFAULT_FORMATTING);
@@ -40,18 +43,18 @@ public class IdleAlarm extends AbstractExtension {
         }
 
         // Register dummy implementation to allow reset timeout calls
-        registerRpc(new ResetTimeoutServerRpc() {
+        registerRpc(new IdleAlarmServerRpc() {
             @Override
             public void resetIdleTimeout() {
-                //ignored, call is just to reset timeout
+                //ignored, call is just to reset session timeouts
             }
-        });
 
-        // For notifying server-side when redirect happened
-        registerRpc(new RedirectServerRpc() {
             @Override
-            public void redirected() {
-                redirectListeners.forEach(RedirectListener::redirected);
+            public void buttonClicked(int id, MouseEventDetails details) {
+                Optional.ofNullable(buttonListeners.get(id)).ifPresent(listener -> {
+                    IdleClickEvent event = new IdleClickEvent(IdleAlarm.this, details, id);
+                    listener.buttonClick(event);
+                });
             }
         });
     }
@@ -59,13 +62,6 @@ public class IdleAlarm extends AbstractExtension {
     @Override
     public void beforeClientResponse(boolean initial) {
         super.beforeClientResponse(initial);
-
-        // Sanity check, URL has to be defined when redirect action or button are enabled
-        if(getTimeoutAction() == TimeoutAction.REDIRECT || isRedirectButtonEnabled()) {
-            if(getRedirectURL() == null || getRedirectURL().isEmpty()) {
-                throw new IllegalStateException("Redirect action or button enabled, but redirect URL not defined!");
-            }
-        }
     }
 
     @Override
@@ -185,15 +181,21 @@ public class IdleAlarm extends AbstractExtension {
         return this;
     }
 
+    /**
+     * Get content mode of message in notification
+     * @return Content mode
+     */
     public ContentMode getContentMode() {
         return getState(false).contentMode;
     }
 
+    /**
+     * Set content mode of message in notification
+     * @param contentMode Content mode of message
+     * @return This IdleAlarm to allow command chaining
+     */
     public IdleAlarm setContentMode(ContentMode contentMode) {
-        if(contentMode == null) {
-            throw new IllegalArgumentException("Content mode can not be null");
-        }
-        getState().contentMode = contentMode;
+        getState().contentMode = Objects.requireNonNull(contentMode);
         return this;
     }
 
@@ -211,50 +213,50 @@ public class IdleAlarm extends AbstractExtension {
      * @param enabled
      * @return
      */
-    public IdleAlarm setLiveTimeoutSecondsEnabled(boolean enabled) {
-        getState().liveTimeoutSecondsEnabled = enabled;
+    public IdleAlarm setCountdown(boolean enabled) {
+        getState().countdownTimeout = enabled;
         return this;
     }
 
     /**
-     * @see #setLiveTimeoutSecondsEnabled(boolean)
+     * @see #setCountdown(boolean)
      *
-     * @return
+     * @return true if live
      */
-    public boolean isLiveTimeoutSecondsEnabled() {
-        return getState(false).liveTimeoutSecondsEnabled;
+    public boolean isCountdown() {
+        return getState(false).countdownTimeout;
     }
 
     /**
-     * URL where to redirect when timeout happens. To set this automatic action, use
-     * setTimeoutAction(TimeoutAction.REDIRECT) or enable redirect button with setRedirectButtonEnabled(true)
+     * URL where to redirect when timeout happens. Will set timeout action to REDIRECT
      *
-     * @param url URL where browser will be redirected when timeout. Can not be null or empty if redirect action
-     *            or button is used.
-     * @return
+     * @param url URL where browser will be redirected when timeout.
+     * @return This IdleAlarm to allow command chaining
      * @see #setTimeoutAction(TimeoutAction)
      */
     public IdleAlarm setRedirectURL(String url) {
-        getState().timeoutRedirectURL = url;
+        getState().timeoutRedirectURL = Objects.requireNonNull(url);
+        setTimeoutAction(TimeoutAction.REDIRECT);
         return this;
     }
 
     /**
-     * Get timeout URL. Notice that given URL will be only used if action is redirect.
+     * Get redirect URL of timeout action
      * @see #setRedirectURL(String)
      *
-     * @return
+     * @return This IdleAlarm to allow command chaining
      */
     public String getRedirectURL() {
         return getState(false).timeoutRedirectURL;
     }
 
     /**
-     * Shows/hides button for closing notification and resetting timer. You need to have timeout redirect URL defined
-     * also to see the button.
+     * Shows/hides button for closing notification and resetting timer. Notice that notification can be also closed by
+     * clicking outside of it (or also inside of it when no buttons). This just allows to have clear close button for
+     * users that might help with UX.
      *
-     * @param closeButtonEnabled
-     * @return
+     * @param closeButtonEnabled true to have separate close button, false to not have it
+     * @return This IdleAlarm to allow command chaining
      */
     public IdleAlarm setCloseButtonEnabled(boolean closeButtonEnabled) {
         getState().closeEnabled = closeButtonEnabled;
@@ -264,149 +266,115 @@ public class IdleAlarm extends AbstractExtension {
     /**
      * @see #setCloseButtonEnabled(boolean)
      *
-     * @return
+     * @return This IdleAlarm to allow command chaining
      */
     public boolean isCloseButtonEnabled() {
         return getState(false).closeEnabled;
     }
 
     /**
-     * Show/hide button for immediately redirecting into URL given in #setRedirectURL. Notice that if redirect URl
-     *
-     * @param redirectButtonEnabled
-     * @return
+     * Remove all application specific buttons added with addButton
+     * @return This IdleAlarm to allow command chaining
      */
-    public IdleAlarm setRedirectButtonEnabled(boolean redirectButtonEnabled) {
-        getState().redirectEnabled = redirectButtonEnabled;
+    public IdleAlarm removeButtons() {
+        getState().buttons.clear();
         return this;
     }
 
     /**
-     * @see #setRedirectButtonEnabled(boolean)
-     *
-     * @return
+     * Add application specific button to warning notification
+     * @param caption Caption of button added
+     * @param listener Listener called when user clicks the button
+     * @return This IdleAlarm to allow command chaining
      */
-    public boolean isRedirectButtonEnabled() {
-        return getState(false).redirectEnabled;
+    public IdleAlarm addButton(String caption, IdleClickListener listener) {
+        return addButton(caption, Collections.EMPTY_LIST, listener);
     }
 
     /**
-     * Show/hide button for immediately refreshing current URL
-     *
-     * @param enabled
-     * @return
+     * Add application specific button to warning notification
+     * @param caption Caption of button added
+     * @param styleNames Stylenames applied to this button (null can be used if no stylenames required)
+     * @param listener Listener called when user clicks the button
+     * @return This IdleAlarm to allow command chaining
      */
-    public IdleAlarm setRefreshButtonEnabled(boolean enabled) {
-        getState().refreshEnabled = enabled;
+    public IdleAlarm addButton(String caption, Collection<String> styleNames, IdleClickListener listener) {
+        IdleAlarmState.ButtonState buttonState = new IdleAlarmState.ButtonState();
+        buttonState.caption = caption;
+        buttonState.styleNames = styleNames == null ? Collections.EMPTY_LIST : new ArrayList<>(styleNames);
+
+        int buttonId = buttonCounter.incrementAndGet();
+        buttonListeners.put(buttonId, Objects.requireNonNull(listener));
+
+        getState().buttons.put(buttonId, buttonState);
+
         return this;
     }
 
     /**
-     * @see #setRedirectButtonEnabled(boolean)
-     *
-     * @return
+     * Helper method to add redirecting button to notification. Will call addButton internally.
+     * @param caption Caption of redirect button
+     * @param url URL where browser window will be redirected
+     * @return This IdleAlarm to allow command chaining
      */
-    public boolean isRefreshButtonEnabled() {
-        return getState(false).refreshEnabled;
+    public IdleAlarm addRedirectButton(String caption, String url) {
+        return addRedirectButton(caption, Arrays.asList("redirect"), url);
+    }
+
+    /**
+     * Helper method to add redirecting button to notification. Will call addButton internally.
+     * @param caption Caption of redirect button
+     * @param styleNames Stylename applied to button
+     * @param url URL where browser window will be redirected
+     * @return This IdleAlarm to allow command chaining
+     */
+    public IdleAlarm addRedirectButton(String caption, Collection<String> styleNames, String url) {
+        return addButton(caption, styleNames, event -> Page.getCurrent().open(url, null));
+    }
+
+    /**
+     * Adds refresh button to notification. Will internally call addButton.
+     * @param caption Caption of refresh button
+     * @return This IdleAlarm to allow command chaining
+     */
+    public IdleAlarm addRefreshButton(String caption) {
+        return addRefreshButton(caption,  Arrays.asList("refresh"));
+    }
+
+    /**
+     * Adds refresh button to notification. Will internally call addButton.
+     * @param caption Caption of refresh button
+     * @param styleNames Stylenames applied to button
+     * @return This IdleAlarm to allow command chaining
+     */
+    public IdleAlarm addRefreshButton(String caption, Collection<String> styleNames) {
+        return addButton(caption, styleNames, event -> Page.getCurrent().reload());
     }
 
     /**
      * Set caption for close button
      *
-     * @param caption
-     * @return
+     * @param caption Caption of close button
+     * @return This IdleAlarm to allow command chaining
      */
     public IdleAlarm setCloseButtonCaption(String caption) {
-        getState().closeCaption = Objects.requireNonNull(caption);
+        getState().closeCaption = caption;
         return this;
     }
 
     /**
      * @see #setCloseButtonCaption(String)
      *
-     * @return
+     * @return This IdleAlarm to allow command chaining
      */
     public String getCloseButtonCaption() {
         return getState(false).closeCaption;
     }
 
     /**
-     * Set caption for redirect button
-     *
-     * @param caption
-     * @return
-     */
-    public IdleAlarm setRedirectButtonCaption(String caption) {
-        getState().redirectCaption = Objects.requireNonNull(caption);
-        return this;
-    }
-
-    /**
-     * @see #setRedirectButtonCaption(String)
-     *
-     * @return
-     */
-    public String getRedirectButtonCaption() {
-        return getState(false).redirectCaption;
-    }
-
-    /**
-     * Set caption for refresh button. Remember also to enable button with setRefreshButtonEnabled(boolean)
-     *
-     * @param caption
-     * @return
-     */
-    public IdleAlarm setRefreshButtonCaption(String caption) {
-        getState().refreshCaption = Objects.requireNonNull(caption);
-        return this;
-    }
-
-    /**
-     * @see #setRefreshButtonCaption(String)
-     *
-     * @return
-     */
-    public String getRefreshButtonCaption() {
-        return getState(false).refreshCaption;
-    }
-
-    /**
-     * Add listener for redirect events
-     *
-     * @param redirectListener
-     * @return
-     */
-    public IdleAlarm addRedirectListener(RedirectListener redirectListener) {
-        redirectListeners.add(redirectListener);
-        return this;
-    }
-
-    /**
-     * @see #addRedirectListener(RedirectListener)
-     *
-     * @param redirectListener
-     * @return
-     */
-    public IdleAlarm removeRedirectListener(RedirectListener redirectListener) {
-        redirectListeners.remove(redirectListener);
-        return this;
-    }
-
-    /**
-     * Listener for redirect events
-     */
-    public interface RedirectListener extends Serializable {
-
-        /**
-         * Redirect happened
-         */
-        void redirected();
-    }
-
-    /**
      * Set timeout action performed automatically when session timeouts
      * @param action Action performed automatically at timeout
-     * @return
+     * @return This IdleAlarm to allow command chaining
      */
     public IdleAlarm setTimeoutAction(TimeoutAction action) {
         getState().timeoutAction = Objects.requireNonNull(action);
@@ -415,7 +383,7 @@ public class IdleAlarm extends AbstractExtension {
 
     /**
      * Get current automatic timeout action
-     * @return
+     * @return This IdleAlarm to allow command chaining
      */
     public TimeoutAction getTimeoutAction() {
         return getState(false).timeoutAction;
@@ -424,10 +392,12 @@ public class IdleAlarm extends AbstractExtension {
     /**
      * Add stylename applied to timeout warning notification
      * @param styleName Stylename added
-     * @return
+     * @return This IdleAlarm to allow command chaining
      */
     public IdleAlarm addStyleName(String styleName) {
-        getState().styleNames.add(Objects.requireNonNull(styleName));
+        if(!getState().styleNames.contains(Objects.requireNonNull(styleName))) {
+            getState().styleNames.add(styleName);
+        }
         return this;
     }
 

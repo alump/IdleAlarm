@@ -21,16 +21,53 @@
       .idle-alarm-message {
         color: $idlealarm-color;
         max-width: 100%;
+        pointer-events: none;
 
         pre {
           margin: 0;
         }
       }
 
-      .close-button, .refresh-button, .redirect-button {
+      .v-button {
         float: right;
         margin-top: 5px;
         margin-left: 5px;
+      }
+
+      &.compact-styling.with-close {
+        .idle-alarm-message {
+          padding-right: 30px;
+        }
+
+        .close-button {
+          position: absolute;
+          top: 5px;
+          right: 5px;
+          background: none;
+          border: none;
+          outline: none;
+          padding: 0;
+          box-shadow: none;
+          height: auto;
+          margin: 0;
+
+          .v-button-wrap {
+            background: none;
+            border: none;
+            outline: none;
+            padding: 0;
+            .v-button-caption {
+              line-height: 1;
+              opacity: 0.6;
+            }
+          }
+
+          &:hover {
+            .v-button-wrap .v-button-caption {
+              opacity: 1;
+            }
+          }
+        }
       }
     }
   }

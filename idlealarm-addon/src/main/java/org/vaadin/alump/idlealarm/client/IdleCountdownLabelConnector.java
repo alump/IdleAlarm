@@ -5,7 +5,7 @@ import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.shared.ui.Connect;
 import org.vaadin.alump.idlealarm.client.shared.IdleCountdownLabelState;
-import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
+import org.vaadin.alump.idlealarm.client.shared.IdleAlarmServerRpc;
 
 import java.util.logging.Logger;
 
@@ -53,7 +53,6 @@ public class IdleCountdownLabelConnector extends AbstractComponentConnector impl
             LOGGER.severe("No connection!");
         } else if(!getTimeoutUtil().isRunning()) {
             getTimeoutUtil().start(getState().maxInactiveInterval);
-            getRpcProxy(ResetTimeoutServerRpc.class).resetIdleTimeout();
         }
     }
 

@@ -131,18 +131,20 @@ public class DemoUI extends UI {
         timeoutAction.setItems(TimeoutAction.values());
         timeoutAction.setValue(TimeoutAction.DEFAULT);
         timeoutAction.setEmptySelectionAllowed(false);
-        TextField timeoutURLField = new TextField("URL where to redirect after timeout");
-        timeoutURLField.setValue("http://www.google.com");
-        timeoutURLField.setWidth(100, Unit.PERCENTAGE);
-        timeoutURLField.setPlaceholder("Write URL here where browser will be redirected");
-        row.addComponents(timeoutAction, timeoutURLField);
-        row.setExpandRatio(timeoutURLField, 1f);
+        TextField redirectURL = new TextField("Redirect URL");
+        redirectURL.setValue("http://www.google.com");
+        redirectURL.setWidth(100, Unit.PERCENTAGE);
+        redirectURL.setPlaceholder("Write URL here");
+        row.addComponents(timeoutAction, redirectURL);
+        row.setExpandRatio(redirectURL, 1f);
         disabledComponents.add(timeoutAction);
-        disabledComponents.add(timeoutURLField);
+        disabledComponents.add(redirectURL);
 
         enableButton.addClickListener(event -> {
 
-            if(redirectButtonEnabled.getValue() && timeoutURLField.isEmpty()) {
+            if((redirectButtonEnabled.getValue() || timeoutAction.getValue().equals(TimeoutAction.REDIRECT))
+                && redirectURL.isEmpty()) {
+
                 Notification.show("Please provide redirect URL", Notification.Type.ERROR_MESSAGE);
                 return;
             }
@@ -151,19 +153,27 @@ public class DemoUI extends UI {
             enableButton.setEnabled(false);
             disableButton.setEnabled(true);
 
-            IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
+            IdleAlarm.get()
+                    .addStyleName(IdleAlarm.COMPACT_STYLING)
+                    .setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
                     .setMessage(warningMessage.getValue())
                     .setContentMode((ContentMode) contentMode.getValue())
-                    .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue())
+                    .setCountdown(liveCountDownEnabled.getValue())
                     .setCloseButtonEnabled(closeButtonEnabled.getValue())
-                    .setRefreshButtonEnabled(refreshButtonEnabled.getValue())
-                    .setTimeoutAction(timeoutAction.getValue())
-                    .addStyleName(IdleAlarm.COMPACT_STYLING)
-                    .setRedirectButtonEnabled(redirectButtonEnabled.getValue())
-                    .setRedirectURL(timeoutURLField.getValue())
-                    .addRedirectListener(()-> {
-                        System.out.println("*** redirect happened ***");
-                    });
+                    .removeButtons()
+                    .setTimeoutAction(timeoutAction.getValue());
+
+            if(redirectButtonEnabled.getValue()) {
+                IdleAlarm.get().addRedirectButton("Redirect", redirectURL.getValue());
+            }
+
+            if(refreshButtonEnabled.getValue()) {
+                IdleAlarm.get().addRefreshButton("Refresh");
+            }
+
+            if(timeoutAction.getValue().equals(TimeoutAction.REDIRECT)) {
+                IdleAlarm.get().setRedirectURL(redirectURL.getValue());
+            }
         });
 
         disableButton.addClickListener(event -> {

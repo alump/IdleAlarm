@@ -1,10 +1,11 @@
 package org.vaadin.alump.idlealarm;
 
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.AbstractComponent;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
 import org.vaadin.alump.idlealarm.client.shared.IdleCountdownLabelState;
-import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
+import org.vaadin.alump.idlealarm.client.shared.IdleAlarmServerRpc;
 
 /**
  * This class is more for debug use cases. It will shown time to idle timeout on client side
@@ -39,14 +40,6 @@ public class IdleCountdownLabel extends AbstractComponent {
     public IdleCountdownLabel(String formatting, ContentMode contentMode) {
         setFormatting(formatting);
         setContentMode(contentMode);
-
-        // Register dummy implementation to allow reset timeout calls
-        registerRpc(new ResetTimeoutServerRpc() {
-            @Override
-            public void resetIdleTimeout() {
-                //ignored, call is just to reset timeout
-            }
-        });
     }
 
     @Override

@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.alump.idlealarm</groupId>
 	<artifactId>idlealarm-addon</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.3.0</version>
+	<version>0.3.1</version>
 	<name>IdleAlarm</name>
 
 	<properties>
@@ -159,13 +159,13 @@
 							org.vaadin.alump.idlealarm,
 							org.vaadin.alump.idlealarm.client.shared
 						</Export-Package>
-						<Import-Package>com.vaadin.data;version="[7.4,8)",
-							com.vaadin.server;version="[7.4,8)",
-							com.vaadin.shared;version="[7.4,8)",
-							com.vaadin.shared.communication;version="[7.4,8)",
-							com.vaadin.shared.ui;version="[7.4,8)",
-							com.vaadin.shared.ui.label;version="[7.4,8)",
-							com.vaadin.ui;version="[7.4,8)"</Import-Package>
+						<Import-Package>com.vaadin.data;version="[8.0,9)",
+							com.vaadin.server;version="[8.0,9)",
+							com.vaadin.shared;version="[8.0,9)",
+							com.vaadin.shared.communication;version="[8.0,9)",
+							com.vaadin.shared.ui;version="[8.0,9)",
+							com.vaadin.shared.ui.label;version="[8.0,9)",
+							com.vaadin.ui;version="[8.0,9)"</Import-Package>
 					</instructions>
 					<archive>
 						<index>true</index>
