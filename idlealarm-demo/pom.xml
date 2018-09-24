@@ -5,7 +5,7 @@
     <groupId>org.vaadin.alump.idlealarm</groupId>
     <artifactId>idlealarm-demo</artifactId>
     <packaging>war</packaging>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <name>IdleAlarm Add-on Demo</name>
 
     <properties>
