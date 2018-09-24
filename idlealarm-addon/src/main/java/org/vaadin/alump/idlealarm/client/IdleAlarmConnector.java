@@ -3,6 +3,10 @@ package org.vaadin.alump.idlealarm.client;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
@@ -82,8 +86,10 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
                 if(!getState().refreshEnabled && !getState().redirectEnabled && !getState().closeEnabled) {
                     overlay.addStyleName("no-buttons");
                 }
-
-                getState().styleNames.forEach(stylename -> overlay.addStyleName(stylename));
+            for(String style:getState().styleNames){
+                        overlay.addStyleName(style);
+               }
+             //   getState().styleNames.forEach(stylename -> overlay.addStyleName(stylename));
 
                 overlayLabel = new HTML();
                 overlayLabel.addStyleName("idle-alarm-message");
@@ -142,9 +148,12 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         VButton closeButton = new VButton();
         closeButton.setText(getState().closeCaption);
         closeButton.addStyleName("close-button");
-        closeButton.addClickHandler(e -> {
+        closeButton.addClickHandler(
+                new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
             closeOverlay();
-            resetTimeout();
+            resetTimeout();}
         });
         return closeButton;
     }
@@ -153,7 +162,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         VButton redirectButton = new VButton();
         redirectButton.setText(getState().redirectCaption);
         redirectButton.addStyleName("redirect-button");
-        redirectButton.addClickHandler(e -> performTimeoutAction(TimeoutAction.REDIRECT));
+        redirectButton.addClickHandler( new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) { performTimeoutAction(TimeoutAction.REDIRECT);}});
         return redirectButton;
     }
 
@@ -161,23 +172,35 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         VButton refreshButton = new VButton();
         refreshButton.setText(getState().refreshCaption);
         refreshButton.addStyleName("refresh-button");
-        refreshButton.addClickHandler(e -> performTimeoutAction(TimeoutAction.REFRESH));
+        refreshButton.addClickHandler( new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) { performTimeoutAction(TimeoutAction.REFRESH);}});
         return refreshButton;
     }
 
-    private void scheduleLiveSecondsToTimeoutUpdater(IdleTimeoutClientUtil.IdleTimeoutUpdateEvent event) {
-        Scheduler.get().scheduleFixedPeriod(() -> {
-            if(timeoutUtil ==  null) {
+    private void scheduleLiveSecondsToTimeoutUpdater(final IdleTimeoutClientUtil.IdleTimeoutUpdateEvent event) {
+        Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                if (timeoutUtil == null) {
+                    return false;
+                }
+                int secondsToTimeout = timeoutUtil.secondsToIdleTimeout(
+                        IdleTimeoutClientUtil.getUnixTimeStamp());
+                if (secondsToTimeout >= 0 && IdleAlarmConnector.this
+                        .isOverlayShowing()) {
+                    String msg = IdleAlarmMessageUtil
+                            .format(IdleAlarmConnector.this.getState().message,
+                                    secondsToTimeout,
+                                    event.getSecondsSinceReset(),
+                                    event.getMaxInactiveInterval());
+                    IdleAlarmMessageUtil.setMessageToHtml(msg,
+                            IdleAlarmConnector.this.getState().contentMode,
+                            overlayLabel);
+                    return true;
+                }
                 return false;
             }
-            int secondsToTimeout = timeoutUtil.secondsToIdleTimeout(IdleTimeoutClientUtil.getUnixTimeStamp());
-            if (secondsToTimeout >= 0 && isOverlayShowing()) {
-                String msg = IdleAlarmMessageUtil.format(getState().message, secondsToTimeout,
-                        event.getSecondsSinceReset(), event.getMaxInactiveInterval());
-                IdleAlarmMessageUtil.setMessageToHtml(msg, getState().contentMode, overlayLabel);
-                return true;
-            }
-            return false;
         }, 1000);
     }
 
@@ -217,7 +240,7 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         return overlay != null && overlay.isShowing();
     }
 
-    private void performTimeoutAction(TimeoutAction manualAction) {
+    private void performTimeoutAction(final TimeoutAction manualAction) {
         if(manualAction == null && getState().timeoutAction == TimeoutAction.DEFAULT) {
             return;
         }
@@ -229,14 +252,18 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
             // only for a manual redirect, in case of an automatic redirect UI is already closed
             getRpcProxy(RedirectServerRpc.class).redirected();
 
-            Scheduler.get().scheduleFixedDelay(() -> {
-                if(manualAction == TimeoutAction.REDIRECT) {
-                    Window.Location.assign(url);
-                } else {
-                    Window.Location.reload();
-                }
-                return false;
-            }, 200);
+            Scheduler.get().scheduleFixedDelay(
+                    new Scheduler.RepeatingCommand() {
+                        @Override
+                        public boolean execute() {
+                            if (manualAction == TimeoutAction.REDIRECT) {
+                                Window.Location.assign(url);
+                            } else {
+                                Window.Location.reload();
+                            }
+                            return false;
+                        }
+                    }, 200);
         } else {
             if(action == TimeoutAction.REDIRECT) {
                 Window.Location.assign(url);

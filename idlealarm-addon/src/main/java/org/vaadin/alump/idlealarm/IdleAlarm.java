@@ -26,7 +26,7 @@ public class IdleAlarm extends AbstractExtension {
             + IdleAlarmFormatting.SECS_TO_TIMEOUT
             + " seconds. Please click anywhere outside this notification to extend session.";
 
-    private Collection<RedirectListener> redirectListeners = new ArrayList<>();
+    private Collection<RedirectListener> redirectListeners = new ArrayList<RedirectListener>();
 
     protected IdleAlarm(UI ui) {
         setMessage(DEFAULT_FORMATTING);
@@ -51,7 +51,10 @@ public class IdleAlarm extends AbstractExtension {
         registerRpc(new RedirectServerRpc() {
             @Override
             public void redirected() {
-                redirectListeners.forEach(RedirectListener::redirected);
+                    for(RedirectListener rd : redirectListeners){
+                        rd.redirected();
+                    }
+              //  redirectListeners.forEach(RedirectListener::redirected);
             }
         });
     }

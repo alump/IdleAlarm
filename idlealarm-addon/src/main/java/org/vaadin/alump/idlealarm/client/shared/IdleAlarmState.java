@@ -37,5 +37,5 @@ public class IdleAlarmState extends SharedState {
 
     public TimeoutAction timeoutAction = TimeoutAction.DEFAULT;
 
-    public List<String> styleNames = new ArrayList<>();
+    public List<String> styleNames = new ArrayList<String>();
 }

@@ -12,6 +12,7 @@ import org.vaadin.alump.idlealarm.client.shared.TimeoutAction;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
+import java.sql.Time;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -125,14 +126,13 @@ public class DemoUI extends UI {
 
         row = createRow(layout);
         row.setWidth(100, Unit.PERCENTAGE);
-        ComboBox<TimeoutAction> timeoutAction = new ComboBox<>("Timeout Action");
-        timeoutAction.setItems(TimeoutAction.values());
+        ComboBox timeoutAction = new ComboBox("Timeout Action");
+        timeoutAction.addItems(TimeoutAction.values());
         timeoutAction.setValue(TimeoutAction.DEFAULT);
-        timeoutAction.setEmptySelectionAllowed(false);
         TextField timeoutURLField = new TextField("URL where to redirect after timeout");
         timeoutURLField.setValue("http://www.google.com");
         timeoutURLField.setWidth(100, Unit.PERCENTAGE);
-        timeoutURLField.setPlaceholder("Write URL here where browser will be redirected");
+       // timeoutURLField.setPlaceholder("Write URL here where browser will be redirected");
         row.addComponents(timeoutAction, timeoutURLField);
         row.setExpandRatio(timeoutURLField, 1f);
         disabledComponents.add(timeoutAction);
@@ -155,7 +155,7 @@ public class DemoUI extends UI {
                     .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue())
                     .setCloseButtonEnabled(closeButtonEnabled.getValue())
                     .setRefreshButtonEnabled(refreshButtonEnabled.getValue())
-                    .setTimeoutAction(timeoutAction.getValue())
+                    .setTimeoutAction((TimeoutAction) timeoutAction.getValue())
                     .addStyleName(IdleAlarm.COMPACT_STYLING)
                     .setRedirectButtonEnabled(redirectButtonEnabled.getValue())
                     .setRedirectURL(timeoutURLField.getValue())
