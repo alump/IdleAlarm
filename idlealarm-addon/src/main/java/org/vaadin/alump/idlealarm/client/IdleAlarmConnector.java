@@ -86,10 +86,9 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
                 if(!getState().refreshEnabled && !getState().redirectEnabled && !getState().closeEnabled) {
                     overlay.addStyleName("no-buttons");
                 }
-            for(String style:getState().styleNames){
-                        overlay.addStyleName(style);
+                for(String style : getState().styleNames){
+                    overlay.addStyleName(style);
                }
-             //   getState().styleNames.forEach(stylename -> overlay.addStyleName(stylename));
 
                 overlayLabel = new HTML();
                 overlayLabel.addStyleName("idle-alarm-message");
@@ -164,7 +163,10 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         redirectButton.addStyleName("redirect-button");
         redirectButton.addClickHandler( new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) { performTimeoutAction(TimeoutAction.REDIRECT);}});
+            public void onClick(ClickEvent event) {
+                performTimeoutAction(TimeoutAction.REDIRECT);
+            }
+        });
         return redirectButton;
     }
 
@@ -174,7 +176,10 @@ public class IdleAlarmConnector extends AbstractExtensionConnector
         refreshButton.addStyleName("refresh-button");
         refreshButton.addClickHandler( new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) { performTimeoutAction(TimeoutAction.REFRESH);}});
+            public void onClick(ClickEvent event) {
+                    performTimeoutAction(TimeoutAction.REFRESH);
+            }
+        });
         return refreshButton;
     }
 
