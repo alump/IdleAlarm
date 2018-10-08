@@ -7,10 +7,14 @@ import com.vaadin.server.*;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
+import org.vaadin.alump.idlealarm.client.shared.TimeoutAction;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
+import java.sql.Time;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Demo UI of IdleAlarm addon
@@ -31,6 +35,8 @@ public class DemoUI extends UI {
     private static final String NOTICE = "<b>Please notice</b> that there is always some extra delay (from seconds to "
         + "few minutes) before session really gets expired. As the idle time out in this application is set to very "
         + " short (60 seconds), you can easily see this extra time here.";
+
+    private Set<Component> disabledComponents = new HashSet<>();
 
     // This add-on old works when closeIdleSessions init parameter is true
     @WebServlet(value = "/*", asyncSupported = true, initParams = {
@@ -68,15 +74,17 @@ public class DemoUI extends UI {
         row.setCaption("Setup warning message (values can be modified only in disabled state)");
 
         final TextField secondsBefore = new TextField("Seconds");
-        secondsBefore.setValue("40");
+        secondsBefore.setValue("50");
         secondsBefore.setWidth(60, Unit.PIXELS);
         row.addComponent(secondsBefore);
+        disabledComponents.add(secondsBefore);
 
         final TextArea warningMessage = new TextArea("Message");
         warningMessage.setValue(IdleAlarm.DEFAULT_FORMATTING);
         warningMessage.setWidth(100, Unit.PERCENTAGE);
         row.addComponent(warningMessage);
         row.setExpandRatio(warningMessage, 1f);
+        disabledComponents.add(warningMessage);
 
         final ComboBox contentMode = new ComboBox("Content mode");
         contentMode.addItem(ContentMode.TEXT);
@@ -85,6 +93,7 @@ public class DemoUI extends UI {
         contentMode.setValue(ContentMode.TEXT);
         contentMode.setNullSelectionAllowed(false);
         row.addComponent(contentMode);
+        disabledComponents.add(contentMode);
 
         final Button enableButton = new Button("Enable");
         row.addComponent(enableButton);
@@ -94,28 +103,6 @@ public class DemoUI extends UI {
         row.addComponent(disableButton);
         row.setComponentAlignment(disableButton, Alignment.TOP_LEFT);
 
-        enableButton.addClickListener(event -> {
-            enableButton.setEnabled(false);
-            disableButton.setEnabled(true);
-            secondsBefore.setEnabled(false);
-            warningMessage.setEnabled(false);
-            contentMode.setEnabled(false);
-
-            IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
-                    .setMessage(warningMessage.getValue())
-                    .setContentMode((ContentMode) contentMode.getValue());
-        });
-
-        disableButton.addClickListener(event -> {
-            enableButton.setEnabled(true);
-            disableButton.setEnabled(false);
-            secondsBefore.setEnabled(true);
-            warningMessage.setEnabled(true);
-            contentMode.setEnabled(true);
-
-            IdleAlarm.unload();
-        });
-
         final String START_BLOCK = "<span class=\"keyword\">";
         final String END_BLOCK = "</span>";
         Label keywords = new Label("Keywords you can use in message are " + START_BLOCK
@@ -124,6 +111,65 @@ public class DemoUI extends UI {
                 + START_BLOCK + IdleAlarmFormatting.SECS_SINCE_RESET + END_BLOCK + ".",
                 ContentMode.HTML);
         layout.addComponent(keywords);
+
+        row = createRow(layout);
+        CheckBox liveCountDownEnabled = new CheckBox("Live seconds timeout counter enabled");
+        liveCountDownEnabled.setValue(false);
+        CheckBox closeButtonEnabled = new CheckBox("Close button");
+        CheckBox refreshButtonEnabled = new CheckBox("Refresh button");
+        CheckBox redirectButtonEnabled = new CheckBox("Redirect button");
+        row.addComponents(liveCountDownEnabled, closeButtonEnabled, refreshButtonEnabled, redirectButtonEnabled);
+        disabledComponents.add(liveCountDownEnabled);
+        disabledComponents.add(closeButtonEnabled);
+        disabledComponents.add(refreshButtonEnabled);
+        disabledComponents.add(redirectButtonEnabled);
+
+        row = createRow(layout);
+        row.setWidth(100, Unit.PERCENTAGE);
+        ComboBox timeoutAction = new ComboBox("Timeout Action");
+        timeoutAction.addItems(TimeoutAction.values());
+        timeoutAction.setValue(TimeoutAction.DEFAULT);
+        TextField timeoutURLField = new TextField("URL where to redirect after timeout");
+        timeoutURLField.setValue("http://www.google.com");
+        timeoutURLField.setWidth(100, Unit.PERCENTAGE);
+       // timeoutURLField.setPlaceholder("Write URL here where browser will be redirected");
+        row.addComponents(timeoutAction, timeoutURLField);
+        row.setExpandRatio(timeoutURLField, 1f);
+        disabledComponents.add(timeoutAction);
+        disabledComponents.add(timeoutURLField);
+
+        enableButton.addClickListener(event -> {
+
+            if(redirectButtonEnabled.getValue() && timeoutURLField.isEmpty()) {
+                Notification.show("Please provide redirect URL", Notification.Type.ERROR_MESSAGE);
+                return;
+            }
+
+            disabledComponents.forEach(c -> c.setEnabled(false));
+            enableButton.setEnabled(false);
+            disableButton.setEnabled(true);
+
+            IdleAlarm.get().setSecondsBefore(Integer.valueOf(secondsBefore.getValue()))
+                    .setMessage(warningMessage.getValue())
+                    .setContentMode((ContentMode) contentMode.getValue())
+                    .setLiveTimeoutSecondsEnabled(liveCountDownEnabled.getValue())
+                    .setCloseButtonEnabled(closeButtonEnabled.getValue())
+                    .setRefreshButtonEnabled(refreshButtonEnabled.getValue())
+                    .setTimeoutAction((TimeoutAction) timeoutAction.getValue())
+                    .addStyleName(IdleAlarm.COMPACT_STYLING)
+                    .setRedirectButtonEnabled(redirectButtonEnabled.getValue())
+                    .setRedirectURL(timeoutURLField.getValue())
+                    .addRedirectListener(()-> {
+                        System.out.println("*** redirect happened ***");
+                    });
+        });
+
+        disableButton.addClickListener(event -> {
+            disabledComponents.forEach(c -> c.setEnabled(true));
+            enableButton.setEnabled(true);
+            disableButton.setEnabled(false);
+            IdleAlarm.unload();
+        });
 
         // -- Labels for debugging --
 

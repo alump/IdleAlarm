@@ -1,20 +1,32 @@
 package org.vaadin.alump.idlealarm;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.Extension;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.UI;
-import org.vaadin.alump.idlealarm.client.shared.IdleAlarmFormatting;
-import org.vaadin.alump.idlealarm.client.shared.IdleAlarmState;
-import org.vaadin.alump.idlealarm.client.shared.ResetTimeoutServerRpc;
+import org.vaadin.alump.idlealarm.client.shared.*;
 
 /**
  * Allows to define idle timeout warning shown on client side before session expires because of long idle period
  */
 public class IdleAlarm extends AbstractExtension {
 
-    public static final String DEFAULT_FORMATTING = "Your session will expire in less than "
-            + IdleAlarmFormatting.SECS_TO_TIMEOUT + " seconds. Please click anywhere to extend session.";
+    /**
+     * Styling that layouts buttons nicely
+     */
+    public static final String COMPACT_STYLING = "compact-styling";
+
+    public static final String DEFAULT_FORMATTING =
+            "Your session will expire in less than "
+            + IdleAlarmFormatting.SECS_TO_TIMEOUT
+            + " seconds. Please click anywhere outside this notification to extend session.";
+
+    private Collection<RedirectListener> redirectListeners = new ArrayList<RedirectListener>();
 
     protected IdleAlarm(UI ui) {
         setMessage(DEFAULT_FORMATTING);
@@ -34,11 +46,39 @@ public class IdleAlarm extends AbstractExtension {
                 //ignored, call is just to reset timeout
             }
         });
+
+        // For notifying server-side when redirect happened
+        registerRpc(new RedirectServerRpc() {
+            @Override
+            public void redirected() {
+                    for(RedirectListener rd : redirectListeners){
+                        rd.redirected();
+                    }
+              //  redirectListeners.forEach(RedirectListener::redirected);
+            }
+        });
+    }
+
+    @Override
+    public void beforeClientResponse(boolean initial) {
+        super.beforeClientResponse(initial);
+
+        // Sanity check, URL has to be defined when redirect action or button are enabled
+        if(getTimeoutAction() == TimeoutAction.REDIRECT || isRedirectButtonEnabled()) {
+            if(getRedirectURL() == null || getRedirectURL().isEmpty()) {
+                throw new IllegalStateException("Redirect action or button enabled, but redirect URL not defined!");
+            }
+        }
     }
 
     @Override
     protected IdleAlarmState getState() {
         return (IdleAlarmState)super.getState();
+    }
+
+    @Override
+    protected IdleAlarmState getState(boolean markDirty) {
+        return (IdleAlarmState)super.getState(markDirty);
     }
 
     /**
@@ -124,7 +164,7 @@ public class IdleAlarm extends AbstractExtension {
      * @return Time in seconds
      */
     public int getSecondsBefore() {
-        return getState().secondsBefore;
+        return getState(false).secondsBefore;
     }
 
     /**
@@ -132,7 +172,7 @@ public class IdleAlarm extends AbstractExtension {
      * @return Idle timeout in seconds
      */
     public int getMaxInactiveInternal() {
-        return getState().maxInactiveInterval;
+        return getState(false).maxInactiveInterval;
     }
 
     /**
@@ -149,7 +189,7 @@ public class IdleAlarm extends AbstractExtension {
     }
 
     public ContentMode getContentMode() {
-        return getState().contentMode;
+        return getState(false).contentMode;
     }
 
     public IdleAlarm setContentMode(ContentMode contentMode) {
@@ -165,6 +205,241 @@ public class IdleAlarm extends AbstractExtension {
      * @return Message shown in idle timeout warning
      */
     public String getMessage() {
-        return getState().message;
+        return getState(false).message;
     }
+
+    /**
+     * Show IdleAlarmFormatting.SECS_TO_TIMEOUT with live seconds counting dow to 0.
+     *
+     * @param enabled
+     * @return
+     */
+    public IdleAlarm setLiveTimeoutSecondsEnabled(boolean enabled) {
+        getState().liveTimeoutSecondsEnabled = enabled;
+        return this;
+    }
+
+    /**
+     * @see #setLiveTimeoutSecondsEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isLiveTimeoutSecondsEnabled() {
+        return getState(false).liveTimeoutSecondsEnabled;
+    }
+
+    /**
+     * URL where to redirect when timeout happens. To set this automatic action, use
+     * setTimeoutAction(TimeoutAction.REDIRECT) or enable redirect button with setRedirectButtonEnabled(true)
+     *
+     * @param url URL where browser will be redirected when timeout. Can not be null or empty if redirect action
+     *            or button is used.
+     * @return
+     * @see #setTimeoutAction(TimeoutAction)
+     */
+    public IdleAlarm setRedirectURL(String url) {
+        getState().timeoutRedirectURL = url;
+        return this;
+    }
+
+    /**
+     * Get timeout URL. Notice that given URL will be only used if action is redirect.
+     * @see #setRedirectURL(String)
+     *
+     * @return
+     */
+    public String getRedirectURL() {
+        return getState(false).timeoutRedirectURL;
+    }
+
+    /**
+     * Shows/hides button for closing notification and resetting timer. You need to have timeout redirect URL defined
+     * also to see the button.
+     *
+     * @param closeButtonEnabled
+     * @return
+     */
+    public IdleAlarm setCloseButtonEnabled(boolean closeButtonEnabled) {
+        getState().closeEnabled = closeButtonEnabled;
+        return this;
+    }
+
+    /**
+     * @see #setCloseButtonEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isCloseButtonEnabled() {
+        return getState(false).closeEnabled;
+    }
+
+    /**
+     * Show/hide button for immediately redirecting into URL given in #setRedirectURL. Notice that if redirect URl
+     *
+     * @param redirectButtonEnabled
+     * @return
+     */
+    public IdleAlarm setRedirectButtonEnabled(boolean redirectButtonEnabled) {
+        getState().redirectEnabled = redirectButtonEnabled;
+        return this;
+    }
+
+    /**
+     * @see #setRedirectButtonEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isRedirectButtonEnabled() {
+        return getState(false).redirectEnabled;
+    }
+
+    /**
+     * Show/hide button for immediately refreshing current URL
+     *
+     * @param enabled
+     * @return
+     */
+    public IdleAlarm setRefreshButtonEnabled(boolean enabled) {
+        getState().refreshEnabled = enabled;
+        return this;
+    }
+
+    /**
+     * @see #setRedirectButtonEnabled(boolean)
+     *
+     * @return
+     */
+    public boolean isRefreshButtonEnabled() {
+        return getState(false).refreshEnabled;
+    }
+
+    /**
+     * Set caption for close button
+     *
+     * @param caption
+     * @return
+     */
+    public IdleAlarm setCloseButtonCaption(String caption) {
+        getState().closeCaption = Objects.requireNonNull(caption);
+        return this;
+    }
+
+    /**
+     * @see #setCloseButtonCaption(String)
+     *
+     * @return
+     */
+    public String getCloseButtonCaption() {
+        return getState(false).closeCaption;
+    }
+
+    /**
+     * Set caption for redirect button
+     *
+     * @param caption
+     * @return
+     */
+    public IdleAlarm setRedirectButtonCaption(String caption) {
+        getState().redirectCaption = Objects.requireNonNull(caption);
+        return this;
+    }
+
+    /**
+     * @see #setRedirectButtonCaption(String)
+     *
+     * @return
+     */
+    public String getRedirectButtonCaption() {
+        return getState(false).redirectCaption;
+    }
+
+    /**
+     * Set caption for refresh button. Remember also to enable button with setRefreshButtonEnabled(boolean)
+     *
+     * @param caption
+     * @return
+     */
+    public IdleAlarm setRefreshButtonCaption(String caption) {
+        getState().refreshCaption = Objects.requireNonNull(caption);
+        return this;
+    }
+
+    /**
+     * @see #setRefreshButtonCaption(String)
+     *
+     * @return
+     */
+    public String getRefreshButtonCaption() {
+        return getState(false).refreshCaption;
+    }
+
+    /**
+     * Add listener for redirect events
+     *
+     * @param redirectListener
+     * @return
+     */
+    public IdleAlarm addRedirectListener(RedirectListener redirectListener) {
+        redirectListeners.add(redirectListener);
+        return this;
+    }
+
+    /**
+     * @see #addRedirectListener(RedirectListener)
+     *
+     * @param redirectListener
+     * @return
+     */
+    public IdleAlarm removeRedirectListener(RedirectListener redirectListener) {
+        redirectListeners.remove(redirectListener);
+        return this;
+    }
+
+    /**
+     * Listener for redirect events
+     */
+    public interface RedirectListener extends Serializable {
+
+        /**
+         * Redirect happened
+         */
+        void redirected();
+    }
+
+    /**
+     * Set timeout action performed automatically when session timeouts
+     * @param action Action performed automatically at timeout
+     * @return
+     */
+    public IdleAlarm setTimeoutAction(TimeoutAction action) {
+        getState().timeoutAction = Objects.requireNonNull(action);
+        return this;
+    }
+
+    /**
+     * Get current automatic timeout action
+     * @return
+     */
+    public TimeoutAction getTimeoutAction() {
+        return getState(false).timeoutAction;
+    }
+
+    /**
+     * Add stylename applied to timeout warning notification
+     * @param styleName Stylename added
+     * @return
+     */
+    public IdleAlarm addStyleName(String styleName) {
+        getState().styleNames.add(Objects.requireNonNull(styleName));
+        return this;
+    }
+
+    /**
+     * Remove stylename applied to timeout warning notification
+     * @param styleName Stylename removed
+     */
+    public void removeStyleName(String styleName) {
+        getState().styleNames.remove(styleName);
+    }
+
 }

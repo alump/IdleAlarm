@@ -9,21 +9,29 @@
   &.v-overlay-container {
 
     .idle-alarm-popup {
-      opacity: $idlealarm-opacity;
       background-color: $idlealarm-bgcolor;
       padding: $idlealarm-padding;
       border: $idlealarm-border;
-      pointer-events: none;
+
+      &.no-buttons {
+        pointer-events: none;
+        opacity: $idlealarm-opacity;
+      }
 
       .idle-alarm-message {
         color: $idlealarm-color;
+        max-width: 100%;
 
         pre {
           margin: 0;
         }
       }
 
+      .close-button, .refresh-button, .redirect-button {
+        float: right;
+        margin-top: 5px;
+        margin-left: 5px;
+      }
     }
-
   }
 }
