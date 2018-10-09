@@ -34,6 +34,9 @@ http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
+### Version 0.1.2 (2018-10-08)
+- Backporting changes from 0.3.1 to Vaadin 7 version (0.1.2). For Vaadin8 still use 0.3.1.
+
 ### Version 0.3.1 (2017-07-08)
 - Add countdown update logic to client side warning (by Johannes Tuikkala)
 - Add support for optional close button (by Johannes Tuikkala)
