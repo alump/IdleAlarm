@@ -31,6 +31,9 @@ http://vaadin.com/addon/idlealarm
 
 ## Release notes
 
+### Version 0.1.2 (2018-10-08)
+- Backporting changes from 0.2.x
+
 ### Version 0.1.1 (2015-07-16)
 - Errors (compile and bundling) in 0.1.0 fixed
 - SCSS values can be now defined by variables
